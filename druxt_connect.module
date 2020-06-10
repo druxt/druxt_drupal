@@ -1,0 +1,45 @@
+<?php
+
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\jsonapi\Routing\Routes;
+
+define('DRUXT_CONNECT_REQUIRED_RESOURCES', [
+  'entity_form_display--entity_form_display',
+  'entity_form_mode--entity_form_mode',
+  'entity_view_display--entity_view_display',
+  'entity_view_mode--entity_view_mode',
+  'field_config--field_config',
+  'field_storage_config--field_storage_config'
+]);
+
+/**
+ * Implements hook_entity_access().
+ */
+function druxt_connect_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
+  $route = \Drupal::routeMatch()->getRouteObject();
+  $defaults = $route->getDefaults();
+
+  // Is the route a JSON API request?
+  if (!Routes::isJsonApiRequest($defaults)) {
+    return AccessResult::neutral();
+  }
+
+  // Is the JSON API resource a Druxt resource?
+  if (!in_array($defaults['resource_type'], DRUXT_CONNECT_REQUIRED_RESOURCES)) {
+    return AccessResult::neutral();
+  }
+
+  // Is the route a GET request?
+  if (!in_array('GET', $route->getMethods())) {
+    return AccessResult::neutral();
+  }
+
+  // Does the user have access?
+  if (!$account->hasPermission('access druxt_connect resources')) {
+    return AccessResult::neutral();
+  }
+
+  return AccessResult::allowed();
+}

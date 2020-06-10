@@ -1,0 +1,13 @@
+{
+    "name": "drupal/druxt_connect",
+    "description": "Provides a quick connection from Drupal to a Druxt (DRUpal nuXT) project.",
+    "type": "drupal-module",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Stuart Clark",
+            "email": "stuart@realityloop.com"
+        }
+    ],
+    "require": {}
+}
