@@ -2,6 +2,7 @@
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\jsonapi\Routing\Routes;
 
@@ -44,4 +45,36 @@ function druxt_connect_entity_access(EntityInterface $entity, $operation, Accoun
   }
 
   return AccessResult::allowed();
+}
+
+/**
+ * Implements hook_jsonapi_entity_filter_access().
+ */
+function druxt_connect_jsonapi_entity_filter_access(EntityTypeInterface $entity_type, AccountInterface $account) {
+  $route = \Drupal::routeMatch()->getRouteObject();
+  $defaults = $route->getDefaults();
+
+  // Is the route a JSON API request?
+  if (!Routes::isJsonApiRequest($defaults)) {
+    return;
+  }
+
+  // Is the JSON API resource a Druxt resource?
+  if (!in_array($defaults['resource_type'], DRUXT_CONNECT_REQUIRED_RESOURCES)) {
+    return;
+  }
+
+  // Is the route a GET request?
+  if (!in_array('GET', $route->getMethods())) {
+    return;
+  }
+
+  // Does the user have access?
+  if (!$account->hasPermission('access druxt_connect resources')) {
+    return;
+  }
+
+  return ([
+    JSONAPI_FILTER_AMONG_ALL => AccessResult::allowed(),
+  ]);
 }
