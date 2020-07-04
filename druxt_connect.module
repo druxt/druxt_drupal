@@ -1,5 +1,6 @@
 <?php
 
+use Drupal\block\Entity\Block;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -7,6 +8,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\jsonapi\Routing\Routes;
 
 define('DRUXT_CONNECT_REQUIRED_RESOURCES', [
+  'block--block',
   'entity_form_display--entity_form_display',
   'entity_form_mode--entity_form_mode',
   'entity_view_display--entity_view_display',
@@ -77,4 +79,13 @@ function druxt_connect_jsonapi_entity_filter_access(EntityTypeInterface $entity_
   return ([
     JSONAPI_FILTER_AMONG_ALL => AccessResult::allowed(),
   ]);
+}
+
+/**
+ * Implments hook_condition_info_alter().
+ */
+function druxt_connect_condition_info_alter(array &$info) {
+  // Use custom 'request_path' plugin to allow setting of the path from Druxt frontend.
+  $info['request_path']['class'] = 'Drupal\druxt_connect\Plugin\Condition\DruxtConnectRequestPath';
+  $info['request_path']['provider'] = 'druxt_connect';
 }
