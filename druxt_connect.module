@@ -20,59 +20,47 @@ define('DRUXT_CONNECT_REQUIRED_RESOURCES', [
 ]);
 
 /**
- * Implements hook_entity_access().
+ * Checks for Druxt route access.
  */
-function druxt_connect_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
+function druxt_connect_access_check(AccountInterface $account) {
   $route = \Drupal::routeMatch()->getRouteObject();
   $defaults = $route->getDefaults();
 
   // Is the route a JSON API request?
   if (!Routes::isJsonApiRequest($defaults)) {
-    return AccessResult::neutral();
+    return FALSE;
   }
 
   // Is the JSON API resource a Druxt resource?
   if (!in_array($defaults['resource_type'], DRUXT_CONNECT_REQUIRED_RESOURCES)) {
-    return AccessResult::neutral();
+    return FALSE;
   }
 
   // Is the route a GET request?
   if (!in_array('GET', $route->getMethods())) {
-    return AccessResult::neutral();
+    return FALSE;
   }
 
   // Does the user have access?
   if (!$account->hasPermission('access druxt_connect resources')) {
-    return AccessResult::neutral();
+    return FALSE;
   }
 
-  return AccessResult::allowed();
+  return TRUE;
+}
+
+/**
+ * Implements hook_entity_access().
+ */
+function druxt_connect_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
+  return druxt_connect_access_check($account) ? AccessResult::allowed() : AccessResult::neutral();
 }
 
 /**
  * Implements hook_jsonapi_entity_filter_access().
  */
 function druxt_connect_jsonapi_entity_filter_access(EntityTypeInterface $entity_type, AccountInterface $account) {
-  $route = \Drupal::routeMatch()->getRouteObject();
-  $defaults = $route->getDefaults();
-
-  // Is the route a JSON API request?
-  if (!Routes::isJsonApiRequest($defaults)) {
-    return;
-  }
-
-  // Is the JSON API resource a Druxt resource?
-  if (!in_array($defaults['resource_type'], DRUXT_CONNECT_REQUIRED_RESOURCES)) {
-    return;
-  }
-
-  // Is the route a GET request?
-  if (!in_array('GET', $route->getMethods())) {
-    return;
-  }
-
-  // Does the user have access?
-  if (!$account->hasPermission('access druxt_connect resources')) {
+  if (!druxt_connect_access_check($account)) {
     return;
   }
 
