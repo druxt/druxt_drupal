@@ -14,7 +14,7 @@ class DruxtConnectRequestPath extends RequestPath {
    */
   public function evaluate() {
     $account = \Drupal::currentUser();
-    return druxt_connect_access_check($account) ? TRUE : parent::evaluate();
+    return druxt_connect_access_check($account) ? !$this->isNegated() : parent::evaluate();
   }
 
 }
