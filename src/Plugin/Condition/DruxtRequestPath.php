@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\druxt_connect\Plugin\Condition;
+namespace Drupal\druxt\Plugin\Condition;
 
 use Drupal\system\Plugin\Condition\RequestPath;
 
@@ -14,7 +14,7 @@ class DruxtConnectRequestPath extends RequestPath {
    */
   public function evaluate() {
     $account = \Drupal::currentUser();
-    return druxt_connect_access_check($account) ? !$this->isNegated() : parent::evaluate();
+    return druxt_access_check($account) ? !$this->isNegated() : parent::evaluate();
   }
 
 }

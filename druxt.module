@@ -7,7 +7,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\jsonapi\Routing\Routes;
 
-define('DRUXT_CONNECT_REQUIRED_RESOURCES', [
+define('DRUXT_RESOURCES', [
   'block--block',
   'entity_form_display--entity_form_display',
   'entity_form_mode--entity_form_mode',
@@ -22,8 +22,12 @@ define('DRUXT_CONNECT_REQUIRED_RESOURCES', [
 /**
  * Checks for Druxt route access.
  */
-function druxt_connect_access_check(AccountInterface $account) {
+function druxt_access_check(AccountInterface $account) {
   $route = \Drupal::routeMatch()->getRouteObject();
+  if (!$route) {
+    return FALSE;
+  }
+
   $defaults = $route->getDefaults();
 
   // Is the route a JSON API request?
@@ -32,7 +36,7 @@ function druxt_connect_access_check(AccountInterface $account) {
   }
 
   // Is the JSON API resource a Druxt resource?
-  if (!in_array($defaults['resource_type'], DRUXT_CONNECT_REQUIRED_RESOURCES)) {
+  if (!in_array($defaults['resource_type'], DRUXT_RESOURCES)) {
     return FALSE;
   }
 
@@ -42,7 +46,7 @@ function druxt_connect_access_check(AccountInterface $account) {
   }
 
   // Does the user have access?
-  if (!$account->hasPermission('access druxt_connect resources')) {
+  if (!$account->hasPermission('access druxt resources')) {
     return FALSE;
   }
 
@@ -52,15 +56,15 @@ function druxt_connect_access_check(AccountInterface $account) {
 /**
  * Implements hook_entity_access().
  */
-function druxt_connect_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
-  return druxt_connect_access_check($account) ? AccessResult::allowed() : AccessResult::neutral();
+function druxt_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
+  return druxt_access_check($account) ? AccessResult::allowed() : AccessResult::neutral();
 }
 
 /**
  * Implements hook_jsonapi_entity_filter_access().
  */
-function druxt_connect_jsonapi_entity_filter_access(EntityTypeInterface $entity_type, AccountInterface $account) {
-  if (!druxt_connect_access_check($account)) {
+function druxt_jsonapi_entity_filter_access(EntityTypeInterface $entity_type, AccountInterface $account) {
+  if (!druxt_access_check($account)) {
     return;
   }
 
@@ -72,8 +76,8 @@ function druxt_connect_jsonapi_entity_filter_access(EntityTypeInterface $entity_
 /**
  * Implments hook_condition_info_alter().
  */
-function druxt_connect_condition_info_alter(array &$info) {
+function druxt_condition_info_alter(array &$info) {
   // Use custom 'request_path' plugin to allow setting of the path from Druxt frontend.
-  $info['request_path']['class'] = 'Drupal\druxt_connect\Plugin\Condition\DruxtConnectRequestPath';
-  $info['request_path']['provider'] = 'druxt_connect';
+  $info['request_path']['class'] = 'Drupal\druxt\Plugin\Condition\DruxtRequestPath';
+  $info['request_path']['provider'] = 'druxt';
 }

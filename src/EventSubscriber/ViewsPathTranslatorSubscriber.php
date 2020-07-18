@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\druxt_connect\EventSubscriber;
+namespace Drupal\druxt\EventSubscriber;
 
 use Drupal\Core\Cache\CacheableJsonResponse;
 use Drupal\Core\Cache\CacheableMetadata;

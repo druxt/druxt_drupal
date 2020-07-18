@@ -1,9 +1,0 @@
-name: Druxt connect
-description: Provides a quick connection from Drupal to a Druxt (DRUpal nuXT) project.
-
-type: module
-core: 8.x
-
-dependencies:
-  - drupal:decoupled_router
-  - drupal:jsonapi

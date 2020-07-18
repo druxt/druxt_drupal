@@ -1,0 +1,9 @@
+name: Druxt
+description: Provides an easy connection from Drupal to a Druxt.js frontend using Drupal's JSON API.
+
+type: module
+core: 8.x
+
+dependencies:
+  - drupal:decoupled_router
+  - drupal:jsonapi
