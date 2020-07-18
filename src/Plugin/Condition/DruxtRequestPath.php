@@ -7,7 +7,7 @@ use Drupal\system\Plugin\Condition\RequestPath;
 /**
  * Provides a 'Request Path' condition.
  */
-class DruxtConnectRequestPath extends RequestPath {
+class DruxtRequestPath extends RequestPath {
 
   /**
    * {@inheritdoc}
