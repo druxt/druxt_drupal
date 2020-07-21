@@ -38,9 +38,9 @@ class ViewsPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
       // but assume that it's working.
       if (UrlHelper::isExternal($path)) {
         $response->setStatusCode(200);
-        $response->setData(array(
+        $response->setData([
           'resolved' => $path,
-        ));
+        ]);
       }
       return;
     }
@@ -106,15 +106,19 @@ class ViewsPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
       $deprecation_message = 'This property has been deprecated and will be removed in the next version of Decoupled Router. Use @alternative instead.';
       $output['meta'] = [
         'deprecated' => [
-          'jsonapi.pathPrefix' => $this->t(
-            $deprecation_message, ['@alternative' => 'basePath']
-          ),
+          //phpcs:disable
+          'jsonapi.pathPrefix' => $this->t($deprecation_message, ['@alternative' => 'basePath']),
         ],
       ];
     }
 
     if ($this->moduleHandler->moduleExists('jsonapi_views')) {
-      $jsonapi_views_route = implode('.', ['jsonapi_views', $match_info['view_id'], $match_info['display_id']]);
+      $parts = [
+        'jsonapi_views',
+        $match_info['view_id'],
+        $match_info['display_id'],
+      ];
+      $jsonapi_views_route = implode('.', $parts);
       $resolved_jsonapi_views_url = Url::fromRoute($jsonapi_views_route, [], ['absolute' => TRUE])->toString(TRUE);
       $response->addCacheableDependency($resolved_jsonapi_views_url);
 
@@ -127,4 +131,5 @@ class ViewsPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
 
     $event->stopPropagation();
   }
+
 }
