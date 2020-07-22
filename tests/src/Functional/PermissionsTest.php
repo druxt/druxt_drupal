@@ -8,7 +8,7 @@ use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\jsonapi\Functional\JsonApiRequestTestTrait;
 
 /**
- * Tests the Druxt resources access permission.
+ * Tests the 'access druxt resources' permission.
  *
  * @group druxt
  */
@@ -33,27 +33,47 @@ class PermissionsTest extends BrowserTestBase {
   protected $defaultTheme = 'stark';
 
   /**
+   * JSON API resources.
+   *
+   * @var array
+   */
+  protected $resources = [
+    'block--block',
+    'entity_form_display--entity_form_display',
+    'entity_form_mode--entity_form_mode',
+    'entity_view_display--entity_view_display',
+    'entity_view_mode--entity_view_mode',
+    'field_config--field_config',
+    'field_storage_config--field_storage_config',
+    'menu_link_content--menu_link_content',
+    'view--view',
+  ];
+
+  /**
+   * Consumer user.
+   *
+   * @var \Drupal\user\Entity\User
+   */
+  protected $consumer;
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    parent::setUp();
+
+    $this->consumer = $this->createUser(['access druxt resources']);
+  }
+
+  /**
    * Test that the permission gives access to all required resources.
    */
   public function testPermissions() {
-    $consumer = $this->createUser(['access druxt resources']);
-    $this->drupalLogin($consumer);
-
-    $resources = [
-      'block--block',
-      'entity_form_display--entity_form_display',
-      'entity_form_mode--entity_form_mode',
-      'entity_view_display--entity_view_display',
-      'entity_view_mode--entity_view_mode',
-      'field_config--field_config',
-      'field_storage_config--field_storage_config',
-      'menu_link_content--menu_link_content',
-      'view--view',
-    ];
+    $this->drupalLogin($this->consumer);
 
     $router = $this->container->get('router');
 
-    foreach ($resources as $resource) {
+    foreach ($this->resources as $resource) {
       // Test GET requests are allowed.
       $res = $this->drupalGet(Url::fromRoute("jsonapi.${resource}.collection"));
       $this->assertSession()->statusCodeEquals(200);
