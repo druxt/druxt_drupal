@@ -75,6 +75,7 @@ class ConditionBypassTest extends BrowserTestBase {
     $res = $this->drupalGet(Url::fromRoute('jsonapi.block--block.collection'));
     $this->assertSession()->statusCodeEquals(200);
     $output = Json::decode($res);
+
     $this->assertArrayNotHasKey('meta', $output);
   }
 
