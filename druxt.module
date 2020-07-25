@@ -1,23 +1,15 @@
 <?php
 
-use Drupal\block\Entity\Block;
+/**
+ * @file
+ * Drupal module hooks and shared functionality.
+ */
+
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\jsonapi\Routing\Routes;
-
-define('DRUXT_RESOURCES', [
-  'block--block',
-  'entity_form_display--entity_form_display',
-  'entity_form_mode--entity_form_mode',
-  'entity_view_display--entity_view_display',
-  'entity_view_mode--entity_view_mode',
-  'field_config--field_config',
-  'field_storage_config--field_storage_config',
-  'menu_link_content--menu_link_content',
-  'view--view'
-]);
 
 /**
  * Checks for Druxt route access.
@@ -36,7 +28,18 @@ function druxt_access_check(AccountInterface $account) {
   }
 
   // Is the JSON API resource a Druxt resource?
-  if (!in_array($defaults['resource_type'], DRUXT_RESOURCES)) {
+  $resources = [
+    'block--block',
+    'entity_form_display--entity_form_display',
+    'entity_form_mode--entity_form_mode',
+    'entity_view_display--entity_view_display',
+    'entity_view_mode--entity_view_mode',
+    'field_config--field_config',
+    'field_storage_config--field_storage_config',
+    'menu_link_content--menu_link_content',
+    'view--view',
+  ];
+  if (!in_array($defaults['resource_type'], $resources)) {
     return FALSE;
   }
 
@@ -77,7 +80,8 @@ function druxt_jsonapi_entity_filter_access(EntityTypeInterface $entity_type, Ac
  * Implments hook_condition_info_alter().
  */
 function druxt_condition_info_alter(array &$info) {
-  // Use custom 'request_path' plugin to allow setting of the path from Druxt frontend.
+  // Use custom 'request_path' plugin to allow setting of the path from Druxt.js
+  // frontend.
   $info['request_path']['class'] = 'Drupal\druxt\Plugin\Condition\DruxtRequestPath';
   $info['request_path']['provider'] = 'druxt';
 }
