@@ -11,5 +11,8 @@
     ],
     "require": {
         "drupal/decoupled_router": "^1.11"
+    },
+    "require-dev": {
+        "drupal/jsonapi_views": "1.x-dev"
     }
 }
