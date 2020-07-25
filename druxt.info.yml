@@ -3,6 +3,7 @@ description: Provides an easy connection from Drupal to a Druxt.js frontend usin
 
 type: module
 core: 8.x
+core_version_requirement: ^8
 
 dependencies:
   - drupal:decoupled_router
