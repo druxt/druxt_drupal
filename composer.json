@@ -10,6 +10,7 @@
         }
     ],
     "require": {
-        "drupal/decoupled_router": "^1.11"
+        "drupal/decoupled_router": "^1.11",
+        "drupal/jsonapi_menu_items": "^1.0.0"
     }
 }

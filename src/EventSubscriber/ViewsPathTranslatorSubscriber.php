@@ -90,7 +90,9 @@ class ViewsPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
       $route_name = sprintf('jsonapi.%s.individual', $type_name);
       $individual = Url::fromRoute(
         $route_name,
-        [static::getEntityRouteParameterName($route_name, $view_type_id) => $view->uuid()],
+        [
+          static::getEntityRouteParameterName($route_name, $view_type_id) => $view->uuid(),
+        ],
         ['absolute' => TRUE]
       )->toString(TRUE);
       $response->addCacheableDependency($entry_point_url);

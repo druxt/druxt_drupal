@@ -8,6 +8,7 @@
 
 - A single permission for read-only access to all JSON API resources required for Druxt.js.
 - Support for Views routes via the [JSON:API Views](https://www.drupal.org/project/jsonapi_views) and [Decoupled Router](https://www.drupal.org/project/decoupled_router) modules.
+- Improved support for Menu items via the [JSON:API Menu Items](https://www.drupal.org/project/jsonapi_menu_items) module.
 - Condition plugin bypass for Block resources.
 - Enables Cross-Origin Resource Sharing (CORS) support.
 
