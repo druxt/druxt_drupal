@@ -1,4 +1,10 @@
 services:
+  druxt.contact_path_translator.subscriber:
+    class: Drupal\druxt\EventSubscriber\ContactPathTranslatorSubscriber
+    parent: decoupled_router.router_path_translator.subscriber
+    tags:
+      - { name: event_subscriber }
+
   # @TODO - Remove this in favour of Decoupled router support in JSON:API Views.
   # @SEE - https://www.drupal.org/project/jsonapi_views/issues/3144598
   druxt.views_path_translator.subscriber:
