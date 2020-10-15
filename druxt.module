@@ -80,7 +80,7 @@ function druxt_jsonapi_entity_filter_access(EntityTypeInterface $entity_type, Ac
  * Implments hook_condition_info_alter().
  */
 function druxt_condition_info_alter(array &$info) {
-  // Use custom 'request_path' plugin to allow setting of the path from Druxt.js
+  // Use custom 'request_path' plugin to allow setting of the path from DruxtJS
   // frontend.
   $info['request_path']['class'] = 'Drupal\druxt\Plugin\Condition\DruxtRequestPath';
   $info['request_path']['provider'] = 'druxt';

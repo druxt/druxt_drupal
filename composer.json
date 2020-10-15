@@ -1,6 +1,6 @@
 {
     "name": "drupal/druxt",
-    "description": "Provides an easy connection from Drupal to a Druxt.js frontend using Drupal's JSON API.",
+    "description": "A bridge between frameworks, Drupal in the back, NuxtJS in the front.",
     "type": "drupal-module",
     "license": "GPL-2.0-or-later",
     "authors": [
@@ -10,7 +10,7 @@
         }
     ],
     "require": {
-        "drupal/decoupled_router": "^1.11",
+        "drupal/decoupled_router": "^2.0",
         "drupal/jsonapi_menu_items": "^1.0.0"
     }
 }
