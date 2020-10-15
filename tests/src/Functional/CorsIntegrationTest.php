@@ -5,7 +5,7 @@ namespace Drupal\Tests\druxt\Functional;
 use Drupal\Tests\BrowserTestBase;
 
 /**
- * Tests CORS provided by Druxt.js.
+ * Tests CORS provided by DruxtJS.
  *
  * @group druxt
  */
