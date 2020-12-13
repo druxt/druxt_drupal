@@ -2,19 +2,18 @@
 
 namespace Drupal\druxt\EventSubscriber;
 
-use Drupal\Core\Cache\CacheableJsonResponse;
-use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Url;
-use Drupal\decoupled_router\EventSubscriber\PathTranslatorBase;
-use Drupal\decoupled_router\PathTranslatorEvent;
-use Symfony\Cmf\Component\Routing\RouteObjectInterface;
-use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 
 /**
  * Event subscriber that processes a path translation with the router info.
  */
 class ViewsPathTranslatorSubscriber extends PathTranslatorBase {
 
+  /**
+   * The View Display.
+   *
+   * @var array
+   */
   protected $display;
 
   /**
@@ -22,7 +21,7 @@ class ViewsPathTranslatorSubscriber extends PathTranslatorBase {
    */
   protected function findEntityAndKeys(array $match_info) {
     if (!$match_info['view_id']) {
-      return [false];
+      return [FALSE];
     }
 
     $entity_type_manager = $this->container->get('entity_type.manager');
@@ -31,7 +30,7 @@ class ViewsPathTranslatorSubscriber extends PathTranslatorBase {
 
     $this->display = $view->getDisplay($match_info['display_id']);
 
-    return [$view, true, null];
+    return [$view, TRUE, NULL];
   }
 
   /**
@@ -52,10 +51,12 @@ class ViewsPathTranslatorSubscriber extends PathTranslatorBase {
    * {@inheritDoc}
    */
   protected function getJsonOutput() {
-    return parent::getJsonOutput() + ['view' => [
-      'view_id' => $this->matchInfo['view_id'],
-      'display_id' => $this->matchInfo['display_id'],
-    ]];
+    return parent::getJsonOutput() + [
+      'view' => [
+        'view_id' => $this->matchInfo['view_id'],
+        'display_id' => $this->matchInfo['display_id'],
+      ],
+    ];
   }
 
 }
