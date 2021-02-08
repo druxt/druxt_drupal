@@ -11,6 +11,7 @@
     ],
     "require": {
         "drupal/decoupled_router": "^2.0",
-        "drupal/jsonapi_menu_items": "^1.0.0"
+        "drupal/jsonapi_menu_items": "^1.0.0",
+        "drupal/jsonapi_views": "^1.0@beta"
     }
 }

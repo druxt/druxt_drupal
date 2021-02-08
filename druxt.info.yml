@@ -8,3 +8,4 @@ dependencies:
   - drupal:decoupled_router
   - drupal:jsonapi
   - drupal:jsonapi_menu_items
+  - drupal:jsonapi_views
