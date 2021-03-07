@@ -36,6 +36,7 @@ function druxt_access_check(AccountInterface $account) {
     'entity_view_mode--entity_view_mode',
     'field_config--field_config',
     'field_storage_config--field_storage_config',
+    'menu--menu',
     'menu_link_content--menu_link_content',
     'view--view',
   ];
