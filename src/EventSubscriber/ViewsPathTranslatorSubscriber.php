@@ -2,6 +2,7 @@
 
 namespace Drupal\druxt\EventSubscriber;
 
+use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Cache\CacheableJsonResponse;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Url;
