@@ -2,7 +2,7 @@
 
 [![CircleCI](https://circleci.com/gh/druxt/druxt_drupal.svg?style=svg)](https://circleci.com/gh/druxt/druxt_drupal)
 
-> A bridge between frameworks, Drupal in the back, NuxtJS in the front.
+> A bridge between frameworks, Drupal in the back, Nuxt.js in the front.
 
 ## Features
 
@@ -15,7 +15,7 @@
 
 ## Installation
 
-DruxtJS requires a NuxtJS frontend and a Drupal JSON:API backend:
+DruxtJS requires a Nuxt.js frontend and a Drupal JSON:API backend:
 
 ### Drupal
 
@@ -35,9 +35,9 @@ DruxtJS requires a NuxtJS frontend and a Drupal JSON:API backend:
 ### Nuxt.js
 
 
-1. [Install NuxtJS](https://nuxtjs.org/guide/installation/)
+1. [Install Nuxt.js](https://nuxtjs.org/guide/installation/)
 
-2. Install the NuxtJS [DruxtJS Site module](http://npmjs.com/package/druxt-site):
+2. Install the Nuxt.js [DruxtJS Site module](http://npmjs.com/package/druxt-site):
 
     ```sh
     npm i druxt-site
