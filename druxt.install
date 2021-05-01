@@ -1,0 +1,20 @@
+<?php
+
+/**
+ * @file
+ * Install functions for DruxtJS.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function druxt_install() {
+  druxt_ensure_entity_view_displays();
+}
+
+/**
+ * Fix missing EntityViewDisplays.
+ */
+function druxt_update_9000() {
+  druxt_ensure_entity_view_displays();
+}
