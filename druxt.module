@@ -6,6 +6,7 @@
  */
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -65,6 +66,13 @@ function druxt_entity_access(EntityInterface $entity, $operation, AccountInterfa
 }
 
 /**
+ * Implements hook_entity_bundle_create().
+ */
+function druxt_entity_bundle_create($entity_type_id, $bundle) {
+  druxt_ensure_entity_view_display($entity_type_id, $bundle);
+}
+
+/**
  * Implements hook_jsonapi_entity_filter_access().
  */
 function druxt_jsonapi_entity_filter_access(EntityTypeInterface $entity_type, AccountInterface $account) {
@@ -85,4 +93,44 @@ function druxt_condition_info_alter(array &$info) {
   // frontend.
   $info['request_path']['class'] = 'Drupal\druxt\Plugin\Condition\DruxtRequestPath';
   $info['request_path']['provider'] = 'druxt';
+}
+
+/**
+ * Ensure that all required EntityViewDisplays are available.
+ */
+function druxt_ensure_entity_view_displays() {
+  $bundle_info = \Drupal::service('entity_type.bundle.info');
+  $display_repository = \Drupal::service('entity_display.repository');
+
+  $view_modes = $display_repository->getAllViewModes();
+  foreach (array_keys($view_modes) as $entity_type_id) {
+    $bundles = $bundle_info->getBundleInfo($entity_type_id);
+    foreach (array_keys($bundles) as $bundle) {
+      $displays = $display_repository->getViewModeOptionsByBundle($entity_type_id, $bundle);
+      if (empty($displays)) {
+        $displays = ['default' => TRUE];
+      }
+      foreach (array_keys($displays) as $mode) {
+        druxt_ensure_entity_view_display($entity_type_id, $bundle, $mode);
+      }
+    }
+  }
+}
+
+/**
+ * Ensure that a specified EntityViewDisplay is present, or create it.
+ */
+function druxt_ensure_entity_view_display($entity_type_id, $bundle, $mode = 'default') {
+  $result = \Drupal::entityQuery('entity_view_display')
+    ->condition('id', "{$entity_type_id}.{$bundle}.{$mode}")
+    ->execute();
+  if (empty($result)) {
+    // Create missing configuration entities.
+    EntityViewDisplay::create([
+      'targetEntityType' => $entity_type_id,
+      'bundle' => $bundle,
+      'mode' => $mode,
+      'status' => TRUE,
+    ])->save();
+  }
 }
