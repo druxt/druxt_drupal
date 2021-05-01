@@ -12,6 +12,7 @@
 - Improved support for Menu items via the [JSON:API Menu Items](https://www.drupal.org/project/jsonapi_menu_items) module.
 - Condition plugin bypass for Block resources.
 - Enables Cross-Origin Resource Sharing (CORS) support.
+- Ensures EntityViewDisplay configuration available for [DruxtSchema](https://schema.druxtjs.org) module.
 
 
 ## Installation
