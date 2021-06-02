@@ -103,7 +103,20 @@ function druxt_ensure_entity_view_displays() {
   $display_repository = \Drupal::service('entity_display.repository');
 
   $view_modes = $display_repository->getAllViewModes();
+  $definitions = \Drupal::entityTypeManager()->getDefinitions();
+
   foreach (array_keys($view_modes) as $entity_type_id) {
+    if (!in_array($entity_type_id, array_keys($definitions))) {
+      continue;
+    }
+
+    $class = \Drupal::entityTypeManager()
+      ->getDefinition($entity_type_id)
+      ->getOriginalClass();
+    if (!($class instanceof FieldableEntityInterface)) {
+      continue;
+    }
+
     $bundles = $bundle_info->getBundleInfo($entity_type_id);
     foreach (array_keys($bundles) as $bundle) {
       $displays = $display_repository->getViewModeOptionsByBundle($entity_type_id, $bundle);
