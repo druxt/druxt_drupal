@@ -31,6 +31,7 @@ function druxt_access_check(AccountInterface $account) {
   // Is the JSON API resource a Druxt resource?
   $resources = [
     'block--block',
+    'configurable_language--configurable_language',
     'entity_form_display--entity_form_display',
     'entity_form_mode--entity_form_mode',
     'entity_view_display--entity_view_display',
