@@ -5,11 +5,75 @@
  * Install functions for DruxtJS.
  */
 
+use Drupal\Core\Link;
+use Drupal\Core\Url;
+
 /**
  * Implements hook_install().
  */
 function druxt_install() {
   druxt_ensure_entity_view_displays();
+}
+
+/**
+ * Implements hook_requirements().
+ */
+function druxt_requirements($phase) {
+  $requirements = [];
+
+  if (\Drupal::hasService('jsonapi.resource_type.repository')) {
+    $moduleHandler = \Drupal::service('module_handler');
+    $resource_type_repository = \Drupal::service('jsonapi.resource_type.repository');
+
+    $required_resources = [
+      'block--block',
+      'entity_form_display--entity_form_display',
+      'entity_form_mode--entity_form_mode',
+      'entity_view_display--entity_view_display',
+      'entity_view_mode--entity_view_mode',
+      'field_config--field_config',
+      'field_storage_config--field_storage_config',
+      'menu--menu',
+      'menu_link_content--menu_link_content',
+      'view--view',
+    ];
+    $disabled_resources = [];
+    foreach ($required_resources as $resource) {
+      list($entity, $bundle) = explode('--', $resource);
+      $resource_type = $resource_type_repository->get($entity, $bundle);
+      if ($resource_type->isInternal() == TRUE) {
+        if ($moduleHandler->moduleExists('jsonapi_extras')) {
+          $disabled_resources[] = new Link(
+            $resource,
+            Url::fromRoute('entity.jsonapi_resource_config.edit_form', ['jsonapi_resource_config' => $resource], [
+              'query' => ['destination' => Url::fromRoute('system.status')->toString()],
+            ])
+          );
+        }
+        else {
+          $disabled_resources[] = $resource;
+        }
+      }
+    }
+
+    if (count($disabled_resources)) {
+      if ($phase == 'install') {
+        \Drupal::messenger()->addWarning(t('Some required JSON:API resources are disabled which may prevent a Druxt frontend from operating correctly. See the <a href=":status">Status report</a> for details.', [':status' => Url::fromRoute('system.status')->toString()]));
+      }
+
+      $requirements['druxt'] = [
+        'title' => t('Druxt JSON:API resources'),
+        'value' => t('The following JSON:API resources are disabled which may prevent a Druxt frontend from operating correctly:'),
+        'description' => [
+          '#theme' => 'item_list',
+          '#items' => $disabled_resources,
+        ],
+        'severity' => REQUIREMENT_WARNING,
+      ];
+    }
+  }
+
+  return $requirements;
 }
 
 /**
