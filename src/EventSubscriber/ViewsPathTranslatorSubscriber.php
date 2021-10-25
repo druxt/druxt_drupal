@@ -8,6 +8,7 @@ use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Url;
 use Drupal\decoupled_router\EventSubscriber\RouterPathTranslatorSubscriber;
 use Drupal\decoupled_router\PathTranslatorEvent;
+use Drupal\views\Views;
 use Symfony\Cmf\Component\Routing\RouteObjectInterface;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 
@@ -53,11 +54,10 @@ class ViewsPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
     $entity_type_manager = $this->container->get('entity_type.manager');
     $views_storage = $entity_type_manager->getStorage('view');
     $view = $views_storage->load($match_info['view_id']);
+    $executable = Views::executableFactory()->get($view);
+    $executable->setDisplay($match_info['display_id']);
 
     $route = $match_info[RouteObjectInterface::ROUTE_OBJECT];
-    $resolved_url = Url::fromRoute($route, [], ['absolute' => TRUE])->toString(TRUE);
-    $response->addCacheableDependency($resolved_url);
-
     $resolved_url = Url::fromRoute($route, [], ['absolute' => TRUE])->toString(TRUE);
     $response->addCacheableDependency($resolved_url);
 
@@ -74,7 +74,7 @@ class ViewsPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
         'view_id' => $match_info['view_id'],
         'display_id' => $match_info['display_id'],
       ],
-      'label' => $match_info['_title'],
+      'label' => $executable->getTitle(),
     ];
 
     // If the route is JSON API, it means that JSON API is installed and its
