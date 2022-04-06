@@ -11,6 +11,7 @@ use Drupal\decoupled_router\PathTranslatorEvent;
 use Drupal\views\Views;
 use Symfony\Cmf\Component\Routing\RouteObjectInterface;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Event subscriber that processes a path translation with the router info.
@@ -32,6 +33,10 @@ class ViewsPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
 
     $path = $event->getPath();
     $path = $this->cleanSubdirInPath($path, $event->getRequest());
+    if ($this->languageManager->isMultilingual()) {
+      $path = $this->getPathFromAlias($path);
+    }
+
     try {
       $match_info = $this->router->match($path);
     }
@@ -66,6 +71,15 @@ class ViewsPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
       (new CacheableMetadata())->setCacheContexts(['url.path.is_front'])
     );
 
+    $langcode = NULL;
+    if ($this->languageManager->isMultilingual()) {
+      $destination = parse_url($event->getPath(), PHP_URL_PATH);
+      $language_negotiation_url = $this->languageManager->getNegotiator()
+        ->getNegotiationMethodInstance('language-url');
+      $router_request = Request::create($destination);
+      $langcode = $language_negotiation_url->getLangcode($router_request);
+    }
+
     $output = [
       'resolved' => $resolved_url->getGeneratedUrl(),
       'isHomePath' => $is_home_path,
@@ -73,6 +87,7 @@ class ViewsPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
         'uuid' => $view->get('uuid'),
         'view_id' => $match_info['view_id'],
         'display_id' => $match_info['display_id'],
+        'langcode' => $langcode
       ],
       'label' => $executable->getTitle(),
     ];
@@ -87,14 +102,24 @@ class ViewsPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
       $rt = $rt_repo->get($view_type_id, $view->bundle());
       $type_name = $rt->getTypeName();
       $jsonapi_base_path = $this->container->getParameter('jsonapi.base_path');
-      $entry_point_url = Url::fromRoute('jsonapi.resource_list', [], ['absolute' => TRUE])->toString(TRUE);
+      $entry_point_url = Url::fromRoute(
+        'jsonapi.resource_list',
+        [],
+        [
+          'absolute' => TRUE,
+          'language' => $langcode,
+        ]
+      )->toString(TRUE);
       $route_name = sprintf('jsonapi.%s.individual', $type_name);
       $individual = Url::fromRoute(
         $route_name,
         [
           static::getEntityRouteParameterName($route_name, $view_type_id) => $view->uuid(),
         ],
-        ['absolute' => TRUE]
+        [
+          'absolute' => TRUE,
+          'language' => $langcode,
+        ]
       )->toString(TRUE);
       $response->addCacheableDependency($entry_point_url);
       $response->addCacheableDependency($individual);
