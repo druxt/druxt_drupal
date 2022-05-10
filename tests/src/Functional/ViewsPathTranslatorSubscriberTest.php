@@ -53,6 +53,9 @@ class ViewsPathTranslatorSubscriberTest extends BrowserTestBase {
     $res = $this->drupalGet('/en/recipes');
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->responseContains('Deep mediterranean quiche');
+
+    $res = $this->drupalGet(Url::fromRoute("jsonapi.decoupled_router.views"));
+    $this->assertSession()->statusCodeEquals(200);
     $output = Json::decode($res);
     $this->assertNotEmpty($output['data']);
     $this->assertEquals('recipes', $output['data']['view_id']);
@@ -63,6 +66,9 @@ class ViewsPathTranslatorSubscriberTest extends BrowserTestBase {
     $res = $this->drupalGet('/es/recipes');
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->responseContains('Quiche mediterráneo profundo');
+
+    $res = $this->drupalGet(Url::fromRoute("jsonapi.decoupled_router.views"));
+    $this->assertSession()->statusCodeEquals(200);
     $output = Json::decode($res);
     $this->assertNotEmpty($output['data']);
     $this->assertEquals('recipes', $output['data']['view_id']);
