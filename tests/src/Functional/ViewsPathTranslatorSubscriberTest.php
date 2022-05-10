@@ -49,7 +49,7 @@ class ViewsPathTranslatorSubscriberTest extends BrowserTestBase {
    */
   public function testViewsPathTranslatorSubscriber() {
 
-    // Assert that the English version display is returned.
+    // Assert that the English language code is handled properly.
     $res = $this->drupalGet('/en/recipes');
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->responseContains('Deep mediterranean quiche');
@@ -59,7 +59,7 @@ class ViewsPathTranslatorSubscriberTest extends BrowserTestBase {
     $this->assertEquals('page_1', $output['data']['display_id']);
     // @todo What else to check for in data?
 
-    // Assert that the Spanish version display is returned.
+    // Assert that the Spanish language code is handled properly.
     $res = $this->drupalGet('/es/recipes');
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->responseContains('Quiche mediterráneo profundo');
