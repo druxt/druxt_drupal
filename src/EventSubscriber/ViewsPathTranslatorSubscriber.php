@@ -11,6 +11,7 @@ use Drupal\decoupled_router\PathTranslatorEvent;
 use Drupal\views\Views;
 use Symfony\Cmf\Component\Routing\RouteObjectInterface;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
+use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -27,6 +28,8 @@ class ViewsPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
       $this->logger->error('Unable to get the response object for the decoupled router event.');
       return;
     }
+
+    // @todo jsonapi_views is dependency in druxt.info.yml, it is always enabled, can't we eleminate this check?
     if (!$this->moduleHandler->moduleExists('jsonapi_views')) {
       return;
     }
@@ -49,11 +52,12 @@ class ViewsPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
           'resolved' => $path,
         ]);
       }
+      // @todo shouldn't there be an else { $response->setStatusCode(404)?
       return;
     }
     catch (MethodNotAllowedException $exception) {
+      // @todo Shouldn't this be a 405 not a 403?
       $response->setStatusCode(403);
-      return;
     }
 
     $entity_type_manager = $this->container->get('entity_type.manager');
@@ -71,6 +75,7 @@ class ViewsPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
       (new CacheableMetadata())->setCacheContexts(['url.path.is_front'])
     );
 
+    // Determine langcode.
     $langcode = NULL;
     if ($this->languageManager->isMultilingual()) {
       $destination = parse_url($event->getPath(), PHP_URL_PATH);
