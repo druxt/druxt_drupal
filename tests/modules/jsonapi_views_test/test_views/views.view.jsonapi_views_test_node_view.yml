@@ -8,8 +8,8 @@ dependencies:
   module:
     - node
     - user
-id: druxt_test_node_view
-label: 'Druxt Test Node View'
+id: jsonapi_views_test_node_view
+label: 'JSON:API Views Test Node View'
 module: views
 description: ''
 tag: ''
@@ -223,7 +223,7 @@ display:
           entity_type: node
           entity_field: nid
           plugin_id: standard
-      title: 'Druxt Test Node View'
+      title: 'JSON:API Views Test Node View'
       header: {  }
       footer: {  }
       empty: {  }
@@ -646,7 +646,7 @@ display:
       row:
         type: node_rss
         options: {  }
-      path: feed/druxt_test_node_view
+      path: feed/jsonapi_views_test_node_view
     cache_metadata:
       max-age: -1
       contexts:
@@ -665,7 +665,7 @@ display:
     position: 1
     display_options:
       display_extenders: {  }
-      path: druxt-test-node-view
+      path: jsonapi-views-test-node-view
     cache_metadata:
       max-age: -1
       contexts:

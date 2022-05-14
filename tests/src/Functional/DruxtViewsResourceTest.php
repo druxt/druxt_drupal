@@ -1,19 +1,19 @@
 <?php
 
-namespace Drupal\Tests\druxt\Functional;
+namespace Drupal\Tests\jsonapi_views\Functional;
 
 use Drupal\Component\Serialization\Json;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Url;
 use Drupal\Tests\jsonapi\Functional\JsonApiRequestTestTrait;
+use Drupal\Tests\views\Functional\ViewTestBase;
 use Drupal\user\Entity\Role;
 use Drupal\user\RoleInterface;
 use Drupal\views\Tests\ViewTestData;
-use Drupal\Tests\views\Functional\ViewTestBase;
- use GuzzleHttp\RequestOptions;
+use GuzzleHttp\RequestOptions;
 
 /**
- * Tests JSON:API Views routes.S
+ * Tests JSON:API Views routes.
  *
  * @group jsonapi_views
  */
@@ -36,14 +36,14 @@ class DruxtViewsResourceTest extends ViewTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['druxt', 'views', 'druxt_views_test'];
+  public static $modules = ['jsonapi_views_test'];
 
   /**
    * Views used by this test.
    *
    * @var array
    */
-  public static $testViews = ['druxt_views_test_node_view'];
+  public static $testViews = ['jsonapi_views_test_node_view'];
 
   /**
    * {@inheritdoc}
@@ -114,7 +114,7 @@ class DruxtViewsResourceTest extends ViewTestBase {
   public function testNodeViewExists() {
     $this->drupalLogin($this->drupalCreateUser(['access content']));
 
-    $this->drupalGet('druxt-views-test-node-view');
+    $this->drupalGet('jsonapi-views-test-node-view');
     $this->assertSession()->statusCodeEquals(200);
 
     // Test that there is an empty reaction rule listing.
@@ -132,7 +132,7 @@ class DruxtViewsResourceTest extends ViewTestBase {
 
     // Page display.
     [$response_document, $headers] = $this->getJsonApiViewResponse(
-      $this->getJsonApiViewUrl('druxt_views_test_node_view', 'page_1')
+      $this->getJsonApiViewUrl('jsonapi_views_test_node_view', 'page_1')
     );
 
     $this->assertIsArray($response_document['data']);
@@ -141,7 +141,7 @@ class DruxtViewsResourceTest extends ViewTestBase {
     $this->assertEqual(2, $response_document['meta']['count']);
     $this->assertCacheContext($headers, 'url.query_args:page');
     $this->assertCacheTags($headers, [
-      'config:views.view.druxt_views_test_node_view',
+      'config:views.view.jsonapi_views_test_node_view',
       'http_response',
       'node:1',
       'node:2',
@@ -150,7 +150,7 @@ class DruxtViewsResourceTest extends ViewTestBase {
 
     // Block display.
     [$response_document, $headers] = $this->getJsonApiViewResponse(
-      $this->getJsonApiViewUrl('druxt_views_test_node_view', 'block_1')
+      $this->getJsonApiViewUrl('jsonapi_views_test_node_view', 'block_1')
     );
 
     $this->assertIsArray($response_document['data']);
@@ -162,7 +162,7 @@ class DruxtViewsResourceTest extends ViewTestBase {
 
     // Attachment display.
     [$response_document, $headers] = $this->getJsonApiViewResponse(
-      $this->getJsonApiViewUrl('druxt_views_test_node_view', 'attachment_1')
+      $this->getJsonApiViewUrl('jsonapi_views_test_node_view', 'attachment_1')
     );
 
     $this->assertIsArray($response_document['data']);
@@ -177,7 +177,7 @@ class DruxtViewsResourceTest extends ViewTestBase {
     $request_options[RequestOptions::HEADERS]['Accept'] = 'application/vnd.api+json';
     $request_options = NestedArray::mergeDeep($request_options, $this->getAuthenticationRequestOptions());
 
-    $response = $this->request('GET', $this->getJsonApiViewUrl('druxt_views_test_node_view', 'feed_1'), $request_options);
+    $response = $this->request('GET', $this->getJsonApiViewUrl('jsonapi_views_test_node_view', 'feed_1'), $request_options);
     $this->assertSame(403, $response->getStatusCode(), var_export(Json::decode((string) $response->getBody()), TRUE));
   }
 
@@ -215,7 +215,7 @@ class DruxtViewsResourceTest extends ViewTestBase {
     // Get published nodes.
     $query = ['views-filter[status]' => '1'];
     [$response_document, $headers] = $this->getJsonApiViewResponse(
-      $this->getJsonApiViewUrl('druxt_views_test_node_view', 'page_1', $query)
+      $this->getJsonApiViewUrl('jsonapi_views_test_node_view', 'page_1', $query)
     );
 
     $this->assertCount(3, $response_document['data']);
@@ -229,7 +229,7 @@ class DruxtViewsResourceTest extends ViewTestBase {
     // Get unpublished nodes.
     $query = ['views-filter[status]' => '0'];
     [$response_document, $headers] = $this->getJsonApiViewResponse(
-      $this->getJsonApiViewUrl('druxt_views_test_node_view', 'page_1', $query)
+      $this->getJsonApiViewUrl('jsonapi_views_test_node_view', 'page_1', $query)
     );
 
     $this->assertCount(5, $response_document['data']);
@@ -243,7 +243,7 @@ class DruxtViewsResourceTest extends ViewTestBase {
     // Get all nodes.
     $query = [];
     [$response_document, $headers] = $this->getJsonApiViewResponse(
-      $this->getJsonApiViewUrl('druxt_views_test_node_view', 'page_1', $query)
+      $this->getJsonApiViewUrl('jsonapi_views_test_node_view', 'page_1', $query)
     );
 
     $this->assertCount(5, $response_document['data']);
@@ -275,7 +275,7 @@ class DruxtViewsResourceTest extends ViewTestBase {
     // Test that the view is ordered by Node ID in asscending direction.
     $query = ['views-sort[sort_by]' => 'nid', 'views-sort[sort_order]' => 'ASC'];
     [$response_document, $headers] = $this->getJsonApiViewResponse(
-      $this->getJsonApiViewUrl('druxt_views_test_node_view', 'page_1', $query)
+      $this->getJsonApiViewUrl('jsonapi_views_test_node_view', 'page_1', $query)
     );
 
     $this->assertCount(5, $response_document['data']);
@@ -290,7 +290,7 @@ class DruxtViewsResourceTest extends ViewTestBase {
       'views-sort[sort_order]' => 'DESC',
     ];
     [$response_document, $headers] = $this->getJsonApiViewResponse(
-      $this->getJsonApiViewUrl('druxt_views_test_node_view', 'page_1', $query)
+      $this->getJsonApiViewUrl('jsonapi_views_test_node_view', 'page_1', $query)
     );
 
     $this->assertCount(5, $response_document['data']);
@@ -339,7 +339,7 @@ class DruxtViewsResourceTest extends ViewTestBase {
     // Get nodes from 2020.
     $query = ['views-argument[]' => '2020'];
     [$response_document, $headers] = $this->getJsonApiViewResponse(
-      $this->getJsonApiViewUrl('druxt_views_test_node_view', 'page_1', $query)
+      $this->getJsonApiViewUrl('jsonapi_views_test_node_view', 'page_1', $query)
     );
 
     $this->assertCount(3, $response_document['data']);
@@ -353,10 +353,9 @@ class DruxtViewsResourceTest extends ViewTestBase {
     // Get nodes from 2021-01.
     $query = ['views-argument[0]' => '2021', 'views-argument[1]' => '01'];
     [$response_document, $headers] = $this->getJsonApiViewResponse(
-      $this->getJsonApiViewUrl('druxt_views_test_node_view', 'page_1', $query)
+      $this->getJsonApiViewUrl('jsonapi_views_test_node_view', 'page_1', $query)
     );
 
-    
     $this->assertCount(5, $response_document['data']);
     $this->assertEquals(5, $response_document['meta']['count']);
     $this->assertArrayNotHasKey('next', $response_document['links']);
@@ -368,7 +367,7 @@ class DruxtViewsResourceTest extends ViewTestBase {
     // Get all nodes.
     $query = [];
     [$response_document, $headers] = $this->getJsonApiViewResponse(
-      $this->getJsonApiViewUrl('druxt_views_test_node_view', 'page_1', $query)
+      $this->getJsonApiViewUrl('jsonapi_views_test_node_view', 'page_1', $query)
     );
 
     $this->assertCount(5, $response_document['data']);
@@ -403,7 +402,7 @@ class DruxtViewsResourceTest extends ViewTestBase {
     // pager links. The block view is configured to show 5 items with no pager.
     $query = [];
     [$response_document, $headers] = $this->getJsonApiViewResponse(
-      $this->getJsonApiViewUrl('druxt_views_test_node_view', 'block_1', $query)
+      $this->getJsonApiViewUrl('jsonapi_views_test_node_view', 'block_1', $query)
     );
 
     $this->assertCount(5, $response_document['data']);
@@ -418,7 +417,7 @@ class DruxtViewsResourceTest extends ViewTestBase {
     // The embed view is configured to show a 5 item mini pager.
     $query = [];
     [$response_document, $headers] = $this->getJsonApiViewResponse(
-      $this->getJsonApiViewUrl('druxt_views_test_node_view', 'embed_1', $query)
+      $this->getJsonApiViewUrl('jsonapi_views_test_node_view', 'embed_1', $query)
     );
 
     $this->assertCount(5, $response_document['data']);
@@ -428,7 +427,7 @@ class DruxtViewsResourceTest extends ViewTestBase {
     }, $response_document['data']));
     $this->assertArrayNotHasKey('prev', $response_document['links']);
     $this->assertSame(
-      $this->getJsonApiViewUrl('druxt_views_test_node_view', 'embed_1', ['page' => 1])->setAbsolute()->toString(),
+      $this->getJsonApiViewUrl('jsonapi_views_test_node_view', 'embed_1', ['page' => 1])->setAbsolute()->toString(),
       $response_document['links']['next']['href']
     );
     $this->assertCacheContext($headers, 'url.query_args:page');
@@ -443,11 +442,11 @@ class DruxtViewsResourceTest extends ViewTestBase {
       return $data['id'];
     }, $response_document['data']));
     $this->assertSame(
-      $this->getJsonApiViewUrl('druxt_views_test_node_view', 'embed_1', ['page' => 0])->setAbsolute()->toString(),
+      $this->getJsonApiViewUrl('jsonapi_views_test_node_view', 'embed_1', ['page' => 0])->setAbsolute()->toString(),
       $response_document['links']['prev']['href']
     );
     $this->assertSame(
-      $this->getJsonApiViewUrl('druxt_views_test_node_view', 'embed_1', ['page' => 2])->setAbsolute()->toString(),
+      $this->getJsonApiViewUrl('jsonapi_views_test_node_view', 'embed_1', ['page' => 2])->setAbsolute()->toString(),
       $response_document['links']['next']['href']
     );
     $this->assertCacheContext($headers, 'url.query_args:page');
@@ -462,7 +461,7 @@ class DruxtViewsResourceTest extends ViewTestBase {
       return $data['id'];
     }, $response_document['data']));
     $this->assertSame(
-      $this->getJsonApiViewUrl('druxt_views_test_node_view', 'embed_1', ['page' => 1])->setAbsolute()->toString(),
+      $this->getJsonApiViewUrl('jsonapi_views_test_node_view', 'embed_1', ['page' => 1])->setAbsolute()->toString(),
       $response_document['links']['prev']['href']
     );
     $this->assertArrayNotHasKey('next', $response_document['links']);
@@ -472,7 +471,7 @@ class DruxtViewsResourceTest extends ViewTestBase {
       'page' => 10,
     ];
     [$response_document, $headers] = $this->getJsonApiViewResponse(
-      $this->getJsonApiViewUrl('druxt_views_test_node_view', 'embed_1', $query)
+      $this->getJsonApiViewUrl('jsonapi_views_test_node_view', 'embed_1', $query)
     );
 
     $this->assertCount(0, $response_document['data']);
