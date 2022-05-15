@@ -36,7 +36,7 @@ class DruxtViewsResourceTest extends ViewTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['jsonapi_views_test'];
+  public static $modules = ['druxt_views_test'];
 
   /**
    * Views used by this test.
@@ -51,7 +51,7 @@ class DruxtViewsResourceTest extends ViewTestBase {
   protected function setUp($import_test_views = TRUE): void {
     parent::setUp($import_test_views);
 
-    ViewTestData::createTestViews(get_class($this), ['jsonapi_views_test']);
+    ViewTestData::createTestViews(get_class($this), ['druxt_views_test']);
     $this->enableViewsTestModule();
 
     // Ensure the anonymous user role has no permissions at all.

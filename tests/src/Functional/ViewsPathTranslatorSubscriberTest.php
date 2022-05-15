@@ -18,11 +18,12 @@ class ViewsPathTranslatorSubscriberTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['druxt', 'jsonapi_views']; //??
+  protected static $modules = ['druxt', 'druxt_test', 'jsonapi_views'];
 
   /**
    * {@inheritdoc}
    */
+  
   protected $defaultTheme = 'stark';
 
   /**
