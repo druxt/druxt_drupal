@@ -66,24 +66,33 @@ class ViewsPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
     $executable = Views::executableFactory()->get($view);
     $executable->setDisplay($match_info['display_id']);
 
-    $route = $match_info[RouteObjectInterface::ROUTE_OBJECT];
-    $resolved_url = Url::fromRoute($route, [], ['absolute' => TRUE])->toString(TRUE);
-    $response->addCacheableDependency($resolved_url);
-
-    $is_home_path = $this->resolvedPathIsHomePath($resolved_url->getGeneratedUrl());
-    $response->addCacheableDependency(
-      (new CacheableMetadata())->setCacheContexts(['url.path.is_front'])
-    );
-
     // Determine langcode.
     $langcode = NULL;
+    $language = NULL;
     if ($this->languageManager->isMultilingual()) {
       $destination = parse_url($event->getPath(), PHP_URL_PATH);
       $language_negotiation_url = $this->languageManager->getNegotiator()
         ->getNegotiationMethodInstance('language-url');
       $router_request = Request::create($destination);
       $langcode = $language_negotiation_url->getLangcode($router_request);
+      $language = $this->languageManager->getLanguage($langcode);
     }
+
+    $route = $match_info[RouteObjectInterface::ROUTE_OBJECT];
+    $resolved_url = Url::fromRoute(
+      $route,
+      [],
+      [
+        'absolute' => TRUE,
+        'language' => $language
+      ]
+    )->toString(TRUE);
+    $response->addCacheableDependency($resolved_url);
+
+    $is_home_path = $this->resolvedPathIsHomePath($resolved_url->getGeneratedUrl());
+    $response->addCacheableDependency(
+      (new CacheableMetadata())->setCacheContexts(['url.path.is_front'])
+    );
 
     $output = [
       'resolved' => $resolved_url->getGeneratedUrl(),
@@ -112,7 +121,7 @@ class ViewsPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
         [],
         [
           'absolute' => TRUE,
-          'language' => $this->languageManager->getLanguage($langcode),
+          'language' => $language,
         ]
       )->toString(TRUE);
       $route_name = sprintf('jsonapi.%s.individual', $type_name);
@@ -123,7 +132,7 @@ class ViewsPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
         ],
         [
           'absolute' => TRUE,
-          'language' => $this->languageManager->getLanguage($langcode),
+          'language' => $language,
         ]
       )->toString(TRUE);
       $response->addCacheableDependency($entry_point_url);
@@ -152,7 +161,14 @@ class ViewsPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
         $match_info['display_id'],
       ];
       $jsonapi_views_route = implode('.', $parts);
-      $resolved_jsonapi_views_url = Url::fromRoute($jsonapi_views_route, [], ['absolute' => TRUE])->toString(TRUE);
+      $resolved_jsonapi_views_url = Url::fromRoute(
+        $jsonapi_views_route,
+        [],
+        [
+          'absolute' => TRUE,
+          'language' => $language
+        ]
+      )->toString(TRUE);
       $response->addCacheableDependency($resolved_jsonapi_views_url);
 
       $output['jsonapi_views'] = $resolved_jsonapi_views_url->getGeneratedUrl();
