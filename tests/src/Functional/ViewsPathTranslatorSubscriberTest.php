@@ -81,7 +81,7 @@ class ViewsPathTranslatorSubscriberTest extends ViewTestBase {
    * when a language is specified in the path.
    */
   public function testViewsPathTranslatorSubscriber() {
-6ytghubv
+
      // Example english JSON data to test for with:
      // {
      //   resolved: 'https://domain.tld/en/articles',
