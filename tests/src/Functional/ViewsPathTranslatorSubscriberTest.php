@@ -22,13 +22,17 @@ class ViewsPathTranslatorSubscriberTest extends ViewTestBase {
    * {@inheritdoc}
    */
   protected static $modules = [
-    'druxt',
+    'config_translation',
+    'content_translation',
     'decoupled_router',
-    'jsonapi_views_test',
+    'druxt',
     'jsonapi_views',
+    'jsonapi_views_test',
     'language',
+    'locale',  
     'node',
   ];
+  
   /**
    * Views used by this test.
    *
