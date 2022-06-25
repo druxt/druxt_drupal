@@ -11,11 +11,13 @@ use GuzzleHttp\RequestOptions;
 use Drupal\Component\Utility\NestedArray;
 
 /**
- * Tests for proper handling of multi-language View display paths.
+ * Tests for proper handling of multilingual View display paths
+ * by the jsonapi views resource.
+ * 
  *
  * @group druxt
  */
-class DruxtViewsResourceMultilingualTest extends ViewTestBase {
+class JsonapiViewsResourceMultilingualTest extends ViewTestBase {
 
   /**
    * {@inheritdoc}
