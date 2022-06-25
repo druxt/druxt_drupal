@@ -11,12 +11,11 @@ use GuzzleHttp\RequestOptions;
 use Drupal\Component\Utility\NestedArray;
 
 /**
- * Tests ViewsPathTranslatorSubscriber for proper handling of
- * multi-language paths.
+ * Tests for proper handling of multi-language View display paths.
  *
  * @group druxt
  */
-class ViewsPathTranslatorSubscriberTest extends ViewTestBase {
+class DruxtViewsResourceMultilingualTest extends ViewTestBase {
 
   /**
    * {@inheritdoc}
