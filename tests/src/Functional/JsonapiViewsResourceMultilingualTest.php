@@ -6,6 +6,7 @@ use Drupal\Component\Serialization\Json;
 use Drupal\Core\Url;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\views\Functional\ViewTestBase;
+use Drupal\Tests\jsonapi_views\Functional\JsonapiViewsResourceTest;
 use Drupal\views\Tests\ViewTestData;
 use GuzzleHttp\RequestOptions;
 use Drupal\Component\Utility\NestedArray;
@@ -13,79 +14,123 @@ use Drupal\Component\Utility\NestedArray;
 /**
  * Tests for proper handling of multilingual View display paths
  * by the jsonapi views resource.
- * 
  *
- * @group druxt
  */
-class JsonapiViewsResourceMultilingualTest extends ViewTestBase {
+class JsonapiViewsResourceMultilingualTest extends JsonapiViewsResourceTest {
 
   /**
-   * {@inheritdoc}
-   */
-  protected static $modules = [
-    'config_translation',
-    'content_translation',
-    'decoupled_router',
-    'druxt',
-    'jsonapi_views',
-    'jsonapi_views_test',
-    'language',
-    'locale',  
-    'node',
-  ];
-  
-  /**
-   * Views used by this test.
+   * @group druxt
    *
-   * @var array
-   */
-  public static $testViews = ['jsonapi_views_test_node_view'];
-
-  /**
-   * {@inheritdoc}
-   */
-
-  protected $defaultTheme = 'stark';
-
-  /**
-   * Consumer user.
+   * Tests that Views display paths resolve to the correct view_id / display_id
+   * when a language is specified in the path.
    *
-   * @var \Drupal\user\Entity\User
    */
-  protected $consumer;
+  public function testJsonApiViewsResourceDisplaysMultilingual() {
+    $location = $this->drupalCreateNode(['type' => 'location']);
+    $room = $this->drupalCreateNode(['type' => 'room']);
 
-  /**
-   * {@inheritdoc}
-   */
-  protected function setUp($import_test_views = TRUE): void {
-    parent::setUp($import_test_views);
+    $this->drupalLogin($this->drupalCreateUser(['access content']));
 
-    ViewTestData::createTestViews(get_class($this), ['jsonapi_views_test']);
-    $this->enableViewsTestModule();
+    // Page display.
+    [$response_document, $headers] = $this->getJsonApiViewResponse(
+      $this->getJsonApiViewUrl('jsonapi_views_test_node_view', 'page_1')
+    );
 
-    $language = ConfigurableLanguage::createFromLangcode('ca');
-    $language->save();
+    $this->assertIsArray($response_document['data']);
+    $this->assertArrayNotHasKey('errors', $response_document);
+    $this->assertCount(2, $response_document['data']);
+    $this->assertEqual(2, $response_document['meta']['count']);
+    $this->assertCacheContext($headers, 'url.query_args:page');
+    $this->assertCacheTags($headers, [
+      'config:views.view.jsonapi_views_test_node_view',
+      'http_response',
+      'node:1',
+      'node:2',
+      'node_list',
+    ]);
 
-    // In order to reflect the changes for a multilingual site in the container
-    // we have to rebuild it.
-    $this->rebuildContainer();
+    // Block display.
+    [$response_document, $headers] = $this->getJsonApiViewResponse(
+      $this->getJsonApiViewUrl('jsonapi_views_test_node_view', 'block_1')
+    );
 
-    // Create consumer.
-    $this->consumer = $this->createUser(['access content', 'access druxt resources']);
-    $this->drupalLogin($this->consumer);
+    $this->assertIsArray($response_document['data']);
+    $this->assertArrayNotHasKey('errors', $response_document);
+    $this->assertCount(1, $response_document['data']);
+    $this->assertEqual(1, $response_document['meta']['count']);
+    $this->assertSame($room->uuid(), $response_document['data'][0]['id']);
+    $this->assertCacheContext($headers, 'url.query_args:page');
 
-    \Drupal::configFactory()->getEditable('language.negotiation')
-      ->set('url.prefixes.ca', 'ca')
-      ->save();
+    // Attachment display.
+    [$response_document, $headers] = $this->getJsonApiViewResponse(
+      $this->getJsonApiViewUrl('jsonapi_views_test_node_view', 'attachment_1')
+    );
 
-    // $this->container->get('router.builder')->rebuildIfNeeded();
+    $this->assertIsArray($response_document['data']);
+    $this->assertArrayNotHasKey('errors', $response_document);
+    $this->assertCount(1, $response_document['data']);
+    $this->assertEqual(1, $response_document['meta']['count']);
+    $this->assertSame($location->uuid(), $response_document['data'][0]['id']);
+    $this->assertCacheContext($headers, 'url.query_args:page');
+
+    // Un-exposed display.
+    $request_options = [];
+    $request_options[RequestOptions::HEADERS]['Accept'] = 'application/vnd.api+json';
+    $request_options = NestedArray::mergeDeep($request_options, $this->getAuthenticationRequestOptions());
+
+    $response = $this->request('GET', $this->getJsonApiViewUrl('jsonapi_views_test_node_view', 'feed_1'), $request_options);
+    $this->assertSame(403, $response->getStatusCode(), var_export(Json::decode((string) $response->getBody()), TRUE));
   }
 
   /**
-   * Tests that Views display paths resolve to the correct view_id / display_id
-   * when a language is specified in the path.
+   * Get a JSON:API Views Url for a given view display.
+   *
+   * @param string $view_name
+   *   The View name.
+   * @param string $display_id
+   *   The View display id.
+   * @param string $query
+   *   A query object to add to the request.
+   * @param string $langcode
+   *   The language code.
+   *
+   * @return \Drupal\core\Url
+   *   The url for a JSON:API View.
    */
-  public function testViewsPathTranslatorSubscriber() {
+  protected function getJsonApiViewUrlMultilingual($view_name, $display_id, $query = [], $langcode='') {
+    if($langcode) {
+      $url = Url::fromUri("internal:/{$langcode}/jsonapi/views/{$view_name}/{$display_id}");
+    } else {
+      $url = Url::fromUri("internal:/jsonapi/views/{$view_name}/{$display_id}");
+    }
+    $url->setOption('query', $query);
+    return $url;
+  }
+
+}
+
+
+
+
+  //
+  //  public function testUrl2View() {
+
+  //    $url = 'https://domain.tld/en/'
+
+  //    $res = $this->drupalGet(
+  //      Url::fromRoute('decoupled_router.path_translation'),
+  //      [
+  //        'query' => [
+  //          'path' => '/ca/jsonapi-views-test-node-view',
+  //          '_format' => 'json',
+  //        ],
+  //      ]
+  //    );
+
+  //    $this->assertSession()->statusCodeEquals(200);
+
+  // }
+
 
      // Example english JSON data to test for with:
      // {
@@ -125,22 +170,9 @@ class JsonapiViewsResourceMultilingualTest extends ViewTestBase {
      //   jsonapi_views: 'https://domain.tld/es/jsonapi/views/featured_articles/page_1'
      // }
 
-    return true;
-
-
-    $res = $this->drupalGet(
-      Url::fromRoute('decoupled_router.path_translation'),
-      [
-        'query' => [
-          'path' => '/ca/jsonapi-views-test-node-view',
-          '_format' => 'json',
-        ],
-      ]
-    );
 
     // // Assert that the English language code is handled properly.
     // $res = $this->drupalGet('/en/recipes');
-    $this->assertSession()->statusCodeEquals(200);
     // $this->assertSession()->responseContains('Deep mediterranean quiche');
 
     // $res = $this->drupalGet(Url::fromRoute("jsonapi.decoupled_router.views"));
@@ -163,71 +195,3 @@ class JsonapiViewsResourceMultilingualTest extends ViewTestBase {
     // $this->assertEquals('recipes', $output['data']['view_id']);
     // $this->assertEquals('page_1', $output['data']['display_id']);
     // @todo What else to check for in data?
-
-  }
-
-  /**
-   * Get a JSON:API Views resource response document.
-   *
-   * @param \Drupal\core\Url $url
-   *   The url for a JSON:API View.
-   *
-   * @return array
-   *   The response document.
-   */
-  protected function getJsonApiViewResponse(Url $url) {
-    $request_options = [];
-    $request_options[RequestOptions::HEADERS]['Accept'] = 'application/vnd.api+json';
-    $request_options = NestedArray::mergeDeep($request_options, $this->getAuthenticationRequestOptions());
-
-    $response = $this->request('GET', $url, $request_options);
-
-    $this->assertSame(200, $response->getStatusCode(), var_export(Json::decode((string) $response->getBody()), TRUE));
-
-    $response_document = Json::decode((string) $response->getBody());
-
-    $this->assertIsArray($response_document['data']);
-    $this->assertArrayNotHasKey('errors', $response_document);
-
-    return [$response_document, $response->getHeaders()];
-  }
-
-  /**
-   * Get a JSON:API Views Url for a given view display and optionally language.
-   *
-   * @param string $view_name
-   *   The View name.
-   * @param string $display_id
-   *   The View display id.
-   * @param string $query
-   *   A query object to add to the request.
-   * @param string $langcode
-   *   A langcode to add to the request.
-   *
-   * @return \Drupal\core\Url
-   *   The url for a JSON:API View.
-   */
-  protected function getJsonApiViewUrl($view_name, $display_id, $query = [], $langcode = "en", ) {
-    $url = Url::fromUri("internal:/jsonapi/views/{$view_name}/{$display_id}");
-    $url->setOption('query', $query);
-
-    return $url;
-  }
-
-  /**
-   * Returns Guzzle request options for authentication.
-   *
-   * @return array
-   *   Guzzle request options to use for authentication.
-   *
-   * @see \GuzzleHttp\ClientInterface::request()
-   */
-  protected function getAuthenticationRequestOptions() {
-    return [
-      'headers' => [
-        'Authorization' => 'Basic ' . base64_encode($this->account->name->value . ':' . $this->account->passRaw),
-      ],
-    ];
-  }
-
-}
