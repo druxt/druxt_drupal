@@ -10,3 +10,8 @@
   left: 0px;
   z-index: 500;
 }
+
+/* Olivero z-index fix */
+html[data-once="node-preview"] .layout-main-wrapper {
+  z-index: unset;
+}
