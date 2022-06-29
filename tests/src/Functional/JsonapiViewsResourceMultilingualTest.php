@@ -33,7 +33,7 @@ class JsonapiViewsResourceMultilingualTest extends JsonapiViewsResourceTest {
 
     // Page display.
     [$response_document, $headers] = $this->getJsonApiViewResponse(
-      $this->getJsonApiViewUrl('jsonapi_views_test_node_view', 'page_1')
+      $this->getJsonApiViewUrlMultilingual('jsonapi_views_test_node_view', 'page_1')
     );
 
     $this->assertIsArray($response_document['data']);
@@ -51,7 +51,7 @@ class JsonapiViewsResourceMultilingualTest extends JsonapiViewsResourceTest {
 
     // Block display.
     [$response_document, $headers] = $this->getJsonApiViewResponse(
-      $this->getJsonApiViewUrl('jsonapi_views_test_node_view', 'block_1')
+      $this->getJsonApiViewUrlMultilingual('jsonapi_views_test_node_view', 'block_1')
     );
 
     $this->assertIsArray($response_document['data']);
@@ -63,7 +63,7 @@ class JsonapiViewsResourceMultilingualTest extends JsonapiViewsResourceTest {
 
     // Attachment display.
     [$response_document, $headers] = $this->getJsonApiViewResponse(
-      $this->getJsonApiViewUrl('jsonapi_views_test_node_view', 'attachment_1')
+      $this->getJsonApiViewUrlMultilingual('jsonapi_views_test_node_view', 'attachment_1')
     );
 
     $this->assertIsArray($response_document['data']);
@@ -78,7 +78,7 @@ class JsonapiViewsResourceMultilingualTest extends JsonapiViewsResourceTest {
     $request_options[RequestOptions::HEADERS]['Accept'] = 'application/vnd.api+json';
     $request_options = NestedArray::mergeDeep($request_options, $this->getAuthenticationRequestOptions());
 
-    $response = $this->request('GET', $this->getJsonApiViewUrl('jsonapi_views_test_node_view', 'feed_1'), $request_options);
+    $response = $this->request('GET', $this->getJsonApiViewUrlMultilingual('jsonapi_views_test_node_view', 'feed_1'), $request_options);
     $this->assertSame(403, $response->getStatusCode(), var_export(Json::decode((string) $response->getBody()), TRUE));
   }
 
