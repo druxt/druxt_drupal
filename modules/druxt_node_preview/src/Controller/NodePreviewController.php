@@ -32,8 +32,9 @@ class NodePreviewController extends CoreNodePreviewController {
 
     // Process the frontend URL.
     $tokens = [
-      'jsonapi_node_preview' => $jsonapi_node_preview,
-      'view_mode' => $view_mode_id,
+      'bundle' => $node_preview->bundle(),
+      'mode' => $view_mode_id,
+      'preview' => $jsonapi_node_preview,
     ];
     $url = $frontend;
     foreach ($tokens as $token => $value) {
@@ -42,10 +43,11 @@ class NodePreviewController extends CoreNodePreviewController {
 
     $build = [
       '#theme' => 'druxt_node_preview',
+      '#bundle' => $node_preview->bundle(),
       '#frontend' => $frontend,
-      '#jsonapi_node_preview' => $jsonapi_node_preview,
+      '#mode' => $view_mode_id,
+      '#preview' => $jsonapi_node_preview,
       '#url' => $url,
-      '#view_mode_id' => $view_mode_id,
     ];
 
     // Add support for View mode switching via default Node library.

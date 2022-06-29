@@ -14,10 +14,11 @@ function druxt_node_preview_theme($existing, $type, $theme, $path) {
   return [
     'druxt_node_preview' => [
       'variables' => [
+        'bundle' => NULL,
         'frontend' => NULL,
-        'jsonapi_node_preview' => NULL,
+        'mode' => NULL,
+        'preview' => NULL,
         'url' => NULL,
-        'view_mode_id' => NULL
       ]
     ]
   ];

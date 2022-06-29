@@ -39,7 +39,7 @@ class DruxtNodePreviewSettingsForm extends ConfigFormBase {
       '#description' =>
         $this->t('The available preview frontends. Enter one value per line, in the format label|url') . '<br />' .
         $this->t('The label is optional: if a line contains a single string, it will be used as url and label.') . '<br />' .
-        $this->t('The following tokens can be used in the url: [jsonapi_node_preview], [view_mode]'),
+        $this->t('The following tokens can be used in the url: [bundle], [mode], [preview]'),
     ];
 
     return parent::buildForm($form, $form_state);

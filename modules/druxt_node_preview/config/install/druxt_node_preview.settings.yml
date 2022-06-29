@@ -1,2 +1,2 @@
 langcode: en
-frontends: "Localhost|http://localhost:3000/node/preview/[view_mode]#[jsonapi_node_preview]"
+frontends: "Localhost|http://localhost:3000/preview/node/[bundle]/[mode]#[preview]"
