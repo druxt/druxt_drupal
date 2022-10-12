@@ -51,6 +51,10 @@ class ViewsPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
       return;
     }
 
+    if (!$match_info['view_id']) {
+      return;
+    }
+
     $entity_type_manager = $this->container->get('entity_type.manager');
     $views_storage = $entity_type_manager->getStorage('view');
     $view = $views_storage->load($match_info['view_id']);
