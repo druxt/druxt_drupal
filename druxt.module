@@ -140,6 +140,7 @@ function druxt_ensure_entity_view_displays() {
  */
 function druxt_ensure_entity_view_display($entity_type_id, $bundle, $mode = 'default') {
   $result = \Drupal::entityQuery('entity_view_display')
+    ->accessCheck(TRUE)
     ->condition('id', "{$entity_type_id}.{$bundle}.{$mode}")
     ->execute();
   if (empty($result)) {

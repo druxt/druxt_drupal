@@ -5,10 +5,10 @@ namespace Drupal\druxt\EventSubscriber;
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Cache\CacheableJsonResponse;
 use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\Core\Routing\RouteObjectInterface;
 use Drupal\Core\Url;
 use Drupal\decoupled_router\EventSubscriber\RouterPathTranslatorSubscriber;
 use Drupal\decoupled_router\PathTranslatorEvent;
-use Symfony\Cmf\Component\Routing\RouteObjectInterface;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 
 /**
