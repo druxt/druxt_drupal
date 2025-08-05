@@ -61,7 +61,7 @@ class ViewsPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
     $executable = Views::executableFactory()->get($view);
     $executable->setDisplay($match_info['display_id']);
 
-    $route = $match_info[RouteObjectInterface::ROUTE_OBJECT];
+    $route = $match_info[\Drupal\Core\Routing\RouteObjectInterface::ROUTE_OBJECT];
     $resolved_url = Url::fromRoute($route, [], ['absolute' => TRUE])->toString(TRUE);
     $response->addCacheableDependency($resolved_url);
 

@@ -59,7 +59,7 @@ class ContactPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
     $contact_storage = $entity_type_manager->getStorage('contact_form');
     $contact_form = $contact_storage->load($config->get('default_form'));
 
-    $route = $match_info[RouteObjectInterface::ROUTE_OBJECT];
+    $route = $match_info[\Drupal\Core\Routing\RouteObjectInterface::ROUTE_OBJECT];
     $resolved_url = Url::fromRoute($route, [], ['absolute' => TRUE])->toString(TRUE);
     $response->addCacheableDependency($resolved_url);
 
