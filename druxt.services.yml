@@ -12,3 +12,9 @@ services:
     parent: decoupled_router.router_path_translator.subscriber
     tags:
       - { name: event_subscriber }
+
+  druxt.wildcard_path_translator.subscriber:
+    class: Drupal\druxt\EventSubscriber\WildcardPathTranslatorSubscriber
+    parent: decoupled_router.router_path_translator.subscriber
+    tags:
+      - { name: event_subscriber }
