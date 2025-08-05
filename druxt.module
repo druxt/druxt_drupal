@@ -9,6 +9,7 @@ use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\jsonapi\Routing\Routes;
 
@@ -91,7 +92,7 @@ function druxt_jsonapi_entity_filter_access(EntityTypeInterface $entity_type, Ac
 }
 
 /**
- * Implments hook_condition_info_alter().
+ * Implements hook_condition_info_alter().
  */
 function druxt_condition_info_alter(array &$info) {
   // Use custom 'request_path' plugin to allow setting of the path from DruxtJS

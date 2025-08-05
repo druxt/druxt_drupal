@@ -43,7 +43,7 @@ class EntityViewDisplayTest extends BrowserTestBase {
   }
 
   /**
-   * Test that EntityViewDisplay configruation is created for bundle.
+   * Test that EntityViewDisplay configuration is created for bundle.
    */
   public function testTaxonomyEntityViewDisplay() {
     $vocabulary = Vocabulary::create([

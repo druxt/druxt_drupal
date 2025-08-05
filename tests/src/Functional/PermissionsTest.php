@@ -75,17 +75,17 @@ class PermissionsTest extends BrowserTestBase {
 
     foreach ($this->resources as $resource) {
       // Test GET requests are allowed.
-      $res = $this->drupalGet(Url::fromRoute("jsonapi.${resource}.collection"));
+      $res = $this->drupalGet(Url::fromRoute("jsonapi.{$resource}.collection"));
       $this->assertSession()->statusCodeEquals(200);
       $output = Json::decode($res);
       $this->assertArrayNotHasKey('meta', $output);
 
-      if (!$router->getRouteCollection()->get("jsonapi.${resource}.collection.post")) {
+      if (!$router->getRouteCollection()->get("jsonapi.{$resource}.collection.post")) {
         continue;
       }
 
       // Test POST requests are not allowed.
-      $url = Url::fromRoute("jsonapi.${resource}.collection.post");
+      $url = Url::fromRoute("jsonapi.{$resource}.collection.post");
       $res = $this->request('POST', $url, []);
       $this->assertSame(405, $res->getStatusCode());
     }

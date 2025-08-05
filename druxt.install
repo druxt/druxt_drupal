@@ -40,7 +40,7 @@ function druxt_requirements($phase) {
     $disabled_resources = [];
     $missing_resources = [];
     foreach ($required_resources as $resource) {
-      list($entity, $bundle) = explode('--', $resource);
+      [$entity, $bundle] = explode('--', $resource);
       $resource_type = $resource_type_repository->get($entity, $bundle);
       if (!$resource_type) {
         $missing_resources[] = $resource;

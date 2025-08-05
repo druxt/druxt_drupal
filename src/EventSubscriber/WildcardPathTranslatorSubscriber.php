@@ -9,6 +9,8 @@ use Drupal\Core\Routing\RouteObjectInterface;
 use Drupal\Core\Url;
 use Drupal\decoupled_router\EventSubscriber\RouterPathTranslatorSubscriber;
 use Drupal\decoupled_router\PathTranslatorEvent;
+use Symfony\Component\Routing\Exception\MethodNotAllowedException;
+use Symfony\Component\Routing\Exception\MissingMandatoryParametersException;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 
 /**
@@ -70,7 +72,7 @@ class WildcardPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
       'resolved' => $resolved_url->getGeneratedUrl(),
       'isHomePath' => $is_home_path,
       'label' => $match_info['_title'],
-      'context' => $match_info
+      'context' => $match_info,
     ];
 
     $response->setStatusCode(200);

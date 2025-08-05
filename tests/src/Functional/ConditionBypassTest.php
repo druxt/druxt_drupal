@@ -8,7 +8,7 @@ use Drupal\block\Entity\Block;
 use Drupal\Tests\BrowserTestBase;
 
 /**
- * Tests the Block Conditon bypass for Druxt resources.
+ * Tests the Block Condition bypass for Druxt resources.
  *
  * @group druxt
  */
