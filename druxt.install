@@ -38,9 +38,14 @@ function druxt_requirements($phase) {
       'view--view',
     ];
     $disabled_resources = [];
+    $missing_resources = [];
     foreach ($required_resources as $resource) {
       list($entity, $bundle) = explode('--', $resource);
       $resource_type = $resource_type_repository->get($entity, $bundle);
+      if (!$resource_type) {
+        $missing_resources[] = $resource;
+        continue;
+      }
       if ($resource_type->isInternal() == TRUE) {
         if ($moduleHandler->moduleExists('jsonapi_extras')) {
           $disabled_resources[] = new Link(
@@ -56,13 +61,31 @@ function druxt_requirements($phase) {
       }
     }
 
+    // Report missing resources.
+    if (count($missing_resources)) {
+      if ($phase == 'install') {
+        \Drupal::messenger()->addWarning(t('Some required JSON:API resources are missing which may prevent a Druxt frontend from operating correctly. See the <a href=":status">Status report</a> for details.', [':status' => Url::fromRoute('system.status')->toString()]));
+      }
+
+      $requirements['druxt_resources_missing'] = [
+        'title' => t('Druxt JSON:API resources missing'),
+        'value' => t('The following JSON:API resources are missing which may prevent a Druxt frontend from operating correctly:'),
+        'description' => [
+          '#theme' => 'item_list',
+          '#items' => $missing_resources,
+        ],
+        'severity' => REQUIREMENT_WARNING,
+      ];
+    }
+
+    // Report disabled resources.
     if (count($disabled_resources)) {
       if ($phase == 'install') {
         \Drupal::messenger()->addWarning(t('Some required JSON:API resources are disabled which may prevent a Druxt frontend from operating correctly. See the <a href=":status">Status report</a> for details.', [':status' => Url::fromRoute('system.status')->toString()]));
       }
 
-      $requirements['druxt'] = [
-        'title' => t('Druxt JSON:API resources'),
+      $requirements['druxt_resources_disabled'] = [
+        'title' => t('Druxt JSON:API resources disabled'),
         'value' => t('The following JSON:API resources are disabled which may prevent a Druxt frontend from operating correctly:'),
         'description' => [
           '#theme' => 'item_list',
