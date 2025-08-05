@@ -51,7 +51,7 @@ class ViewsPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
       return;
     }
 
-    if (!$match_info['view_id']) {
+    if (!isset($match_info['view_id']) || !$match_info['view_id']) {
       return;
     }
 
