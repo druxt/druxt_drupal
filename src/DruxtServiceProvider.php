@@ -19,9 +19,9 @@ class DruxtServiceProvider implements ServiceModifierInterface {
       // Enable CORS by default.
       $cors_config['enabled'] = TRUE;
 
-      // Set allowed headers to '*' by default.
-      if (count($cors_config['allowedHeaders']) === 0) {
-        $cors_config['allowedHeaders'][] = '*';
+      // Set allowed headers to '*' by default when empty/undefined.
+      if (empty($cors_config['allowedHeaders'])) {
+        $cors_config['allowedHeaders'] = ['*'];
       }
 
       $container->setParameter('cors.config', $cors_config);
