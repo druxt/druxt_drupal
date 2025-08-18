@@ -27,6 +27,7 @@ class CorsIntegrationTest extends BrowserTestBase {
   public function testCrossSiteRequestEnabled() {
     $cors_config = $this->container->getParameter('cors.config');
     $this->assertTrue($cors_config['enabled']);
+    $this->assertContains('*', $cors_config['allowedHeaders']);
   }
 
 }
