@@ -1,0 +1,215 @@
+name: Test
+
+on:
+  push:
+    tags:
+      - '**'
+    branches:
+      - 1.2.x
+  pull_request:
+    branches:
+      - 1.2.x
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 22
+          cache: ${{ github.event_name == 'push' && 'npm' || '' }}
+
+      - name: Install Node.js dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Lint code with CSpell
+        run: npm run lint-spell
+        continue-on-error: ${{ vars.CI_CSPELL_IGNORE_FAILURE == '1' }}
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+        with:
+          path: /tmp/composer-cache
+          key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: 8.5
+          extensions: gd, sqlite, pdo_sqlite
+
+      - name: Assemble the codebase
+        run: .devtools/assemble
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Lint code with PHPCS
+        working-directory: build
+        run: vendor/bin/phpcs
+        continue-on-error: ${{ vars.CI_PHPCS_IGNORE_FAILURE == '1' }}
+
+      - name: Lint code with PHPStan
+        working-directory: build
+        run: vendor/bin/phpstan
+        continue-on-error: ${{ vars.CI_PHPSTAN_IGNORE_FAILURE == '1' }}
+
+      - name: Lint code with Rector
+        working-directory: build
+        run: vendor/bin/rector --clear-cache --dry-run
+        continue-on-error: ${{ vars.CI_RECTOR_IGNORE_FAILURE == '1' }}
+
+
+      - name: Lint module code with NodeJS linters
+        if: ${{ hashFiles('build/node_modules/.package-lock.json') != '' }}
+        working-directory: build
+        run: npm run lint
+        continue-on-error: ${{ vars.CI_NODEJS_LINT_IGNORE_FAILURE == '1' }}
+
+  test:
+    runs-on: ubuntu-24.04
+
+    permissions:
+      contents: read
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        include:
+          - name: test-php-min-d10-stable
+            php-version: 8.2
+            drupal-version: 10
+
+          - name: test-php-max-d10-stable
+            php-version: 8.4
+            drupal-version: 10
+
+          - name: test-php-min-d11-stable
+            php-version: 8.3
+            drupal-version: 11
+
+          - name: test-php-max-d11-stable
+            php-version: 8.5
+            drupal-version: 11
+
+          - name: test-php-min-d11-legacy
+            php-version: 8.3
+            drupal-version: 11.1.0
+
+          - name: test-php-max-d11-canary
+            php-version: 8.5
+            drupal-version: 11@beta
+            stability: canary
+
+    services:
+      chrome:
+        image: selenium/standalone-chromium:latest@sha256:8c5a8629c96104c0d73df94c6437af9ab9059c4e16aa32e35b330b7d77defe0b
+        ports:
+          - 4444:4444
+
+    name: ${{ matrix.name }}
+
+    env:
+      DRUPAL_VERSION: ${{ matrix.drupal-version }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+        with:
+          path: /tmp/composer-cache
+          key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
+
+      - name: Upgrade sqlite3
+        run: |
+          wget https://www.sqlite.org/2024/sqlite-autoconf-3450300.tar.gz -O /tmp/sqlite.tar.gz
+          tar -xzf /tmp/sqlite.tar.gz -C /tmp
+          cd /tmp/sqlite-autoconf-3450300
+          ./configure CFLAGS="-DSQLITE_ENABLE_COLUMN_METADATA=1" --prefix=/usr/local
+          make && sudo make install
+          sudo ldconfig
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: gd, sqlite, pdo_sqlite
+          coverage: pcov
+
+      # Disable Symfony deprecations helper for PHP 8.4+ until minor
+      # versions of Drupal 10 and 11 fully support newer PHP versions.
+      # @see https://www.drupal.org/project/drupal/issues/1267246
+      - name: Update SYMFONY_DEPRECATIONS_HELPER for PHP 8.4+
+        run: |
+          if [ "$(php -r 'echo PHP_MAJOR_VERSION . PHP_MINOR_VERSION;')" -ge "84" ]; then
+            echo "SYMFONY_DEPRECATIONS_HELPER=disabled" >> "$GITHUB_ENV"
+          fi
+
+      - name: Assemble the codebase
+        run: .devtools/assemble
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Start built-in PHP server
+        run: .devtools/start
+        env:
+          WEBSERVER_HOST: 0.0.0.0
+
+      - name: Provision site
+        run: .devtools/provision
+
+      - name: Run JS tests
+        if: ${{ hashFiles('build/node_modules/.package-lock.json') != '' }}
+        working-directory: build
+        run: npm test
+        continue-on-error: ${{ vars.CI_NODEJS_TEST_IGNORE_FAILURE == '1' }}
+
+      - name: Run tests
+        working-directory: build
+        run: php -d pcov.directory=.. vendor/bin/phpunit
+        continue-on-error: ${{ vars.CI_TEST_IGNORE_FAILURE == '1' }}
+        env:
+          BROWSERTEST_OUTPUT_DIRECTORY: /tmp
+          SIMPLETEST_DB: sqlite://tmp/db.sqlite
+
+      - name: Upload test results as an artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        if: always()
+        with:
+          name: Artifacts (${{ matrix.name }})
+          path: build/web/sites/simpletest/browser_output
+
+      - name: Upload coverage report as an artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: ${{github.job}}-code-coverage-report-${{ matrix.name }}
+          path: ./.logs/coverage
+          include-hidden-files: true
+          if-no-files-found: error
+
+      - name: Upload coverage report to Codecov
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
+        if: ${{ env.CODECOV_TOKEN != '' }}
+        with:
+          directory: ./.logs/coverage
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

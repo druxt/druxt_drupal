@@ -1,7 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\druxt\Functional;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Url;
 use Drupal\Tests\BrowserTestBase;
@@ -12,6 +16,8 @@ use Drupal\Tests\jsonapi\Functional\JsonApiRequestTestTrait;
  *
  * @group druxt
  */
+#[Group('druxt')]
+#[RunTestsInSeparateProcesses]
 class PermissionsTest extends BrowserTestBase {
 
   use JsonApiRequestTestTrait;
@@ -52,7 +58,7 @@ class PermissionsTest extends BrowserTestBase {
   /**
    * Consumer user.
    *
-   * @var \Drupal\user\Entity\User
+   * @var \Drupal\user\UserInterface
    */
   protected $consumer;
 
@@ -68,24 +74,24 @@ class PermissionsTest extends BrowserTestBase {
   /**
    * Test that the permission gives access to all required resources.
    */
-  public function testPermissions() {
+  public function testPermissions(): void {
     $this->drupalLogin($this->consumer);
 
     $router = $this->container->get('router');
 
     foreach ($this->resources as $resource) {
       // Test GET requests are allowed.
-      $res = $this->drupalGet(Url::fromRoute("jsonapi.{$resource}.collection"));
+      $res = $this->drupalGet(Url::fromRoute(sprintf('jsonapi.%s.collection', $resource)));
       $this->assertSession()->statusCodeEquals(200);
       $output = Json::decode($res);
       $this->assertArrayNotHasKey('meta', $output);
 
-      if (!$router->getRouteCollection()->get("jsonapi.{$resource}.collection.post")) {
+      if (!$router->getRouteCollection()->get(sprintf('jsonapi.%s.collection.post', $resource))) {
         continue;
       }
 
       // Test POST requests are not allowed.
-      $url = Url::fromRoute("jsonapi.{$resource}.collection.post");
+      $url = Url::fromRoute(sprintf('jsonapi.%s.collection.post', $resource));
       $res = $this->request('POST', $url, []);
       $this->assertSame(405, $res->getStatusCode());
     }

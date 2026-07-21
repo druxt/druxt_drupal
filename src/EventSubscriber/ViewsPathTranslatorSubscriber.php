@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\druxt\EventSubscriber;
 
 use Drupal\Component\Utility\UrlHelper;
@@ -21,7 +23,8 @@ class ViewsPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
   /**
    * {@inheritdoc}
    */
-  public function onPathTranslation(PathTranslatorEvent $event) {
+  #[\Override]
+  public function onPathTranslation(PathTranslatorEvent $event): void {
     $response = $event->getResponse();
     if (!$response instanceof CacheableJsonResponse) {
       $this->logger->error('Unable to get the response object for the decoupled router event.');
@@ -36,7 +39,7 @@ class ViewsPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
     try {
       $match_info = $this->router->match($path);
     }
-    catch (ResourceNotFoundException $exception) {
+    catch (ResourceNotFoundException) {
       // If URL is external, we won't perform checks for content in Drupal,
       // but assume that it's working.
       if (UrlHelper::isExternal($path)) {
@@ -47,7 +50,7 @@ class ViewsPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
       }
       return;
     }
-    catch (MethodNotAllowedException $exception) {
+    catch (MethodNotAllowedException) {
       $response->setStatusCode(403);
       return;
     }
@@ -92,6 +95,9 @@ class ViewsPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
       $rt = $rt_repo->get($view_type_id, $view->bundle());
       $type_name = $rt->getTypeName();
       $jsonapi_base_path = $this->container->getParameter('jsonapi.base_path');
+      if (!is_string($jsonapi_base_path)) {
+        $jsonapi_base_path = '';
+      }
       $entry_point_url = Url::fromRoute('jsonapi.resource_list', [], ['absolute' => TRUE])->toString(TRUE);
       $route_name = sprintf('jsonapi.%s.individual', $type_name);
       $individual = Url::fromRoute(
@@ -120,18 +126,16 @@ class ViewsPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
       ];
     }
 
-    if ($this->moduleHandler->moduleExists('jsonapi_views')) {
-      $parts = [
-        'jsonapi_views',
-        $match_info['view_id'],
-        $match_info['display_id'],
-      ];
-      $jsonapi_views_route = implode('.', $parts);
-      $resolved_jsonapi_views_url = Url::fromRoute($jsonapi_views_route, [], ['absolute' => TRUE])->toString(TRUE);
-      $response->addCacheableDependency($resolved_jsonapi_views_url);
+    $parts = [
+      'jsonapi_views',
+      $match_info['view_id'],
+      $match_info['display_id'],
+    ];
+    $jsonapi_views_route = implode('.', $parts);
+    $resolved_jsonapi_views_url = Url::fromRoute($jsonapi_views_route, [], ['absolute' => TRUE])->toString(TRUE);
+    $response->addCacheableDependency($resolved_jsonapi_views_url);
 
-      $output['jsonapi_views'] = $resolved_jsonapi_views_url->getGeneratedUrl();
-    }
+    $output['jsonapi_views'] = $resolved_jsonapi_views_url->getGeneratedUrl();
 
     $response->addCacheableDependency($view);
     $response->setStatusCode(200);
