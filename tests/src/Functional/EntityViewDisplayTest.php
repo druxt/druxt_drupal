@@ -1,7 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\druxt\Functional;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Url;
 use Drupal\taxonomy\Entity\Vocabulary;
@@ -12,6 +16,8 @@ use Drupal\Tests\BrowserTestBase;
  *
  * @group druxt
  */
+#[Group('druxt')]
+#[RunTestsInSeparateProcesses]
 class EntityViewDisplayTest extends BrowserTestBase {
 
   /**
@@ -27,7 +33,7 @@ class EntityViewDisplayTest extends BrowserTestBase {
   /**
    * Consumer user.
    *
-   * @var \Drupal\user\Entity\User
+   * @var \Drupal\user\UserInterface
    */
   protected $consumer;
 
@@ -45,7 +51,7 @@ class EntityViewDisplayTest extends BrowserTestBase {
   /**
    * Test that EntityViewDisplay configuration is created for bundle.
    */
-  public function testTaxonomyEntityViewDisplay() {
+  public function testTaxonomyEntityViewDisplay(): void {
     $vocabulary = Vocabulary::create([
       'name' => 'Tags',
       'vid' => 'tags',

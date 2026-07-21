@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- DrupalCI PHPUnit configuration - no <source> to avoid process isolation -->
+<!-- symlink recursion in DrupalCI environments. -->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         bootstrap="web/core/tests/bootstrap.php"
+         colors="true"
+         beStrictAboutTestsThatDoNotTestAnything="true"
+         beStrictAboutOutputDuringTests="true"
+         beStrictAboutChangesToGlobalState="true"
+         failOnWarning="true"
+         cacheResult="false"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd"
+         cacheDirectory=".phpunit.cache">
+    <php>
+        <ini name="error_reporting" value="24575"/>
+        <ini name="memory_limit" value="-1"/>
+        <env name="SIMPLETEST_BASE_URL" value="http://localhost:8000"/>
+        <env name="SIMPLETEST_DB" value="sqlite://localhost/drupal_test_extension.sqlite" force="true"/>
+        <env name="BROWSERTEST_OUTPUT_BASE_URL" value=""/>
+        <env name="MINK_DRIVER_CLASS" value=""/>
+        <env name="MINK_DRIVER_ARGS" value=""/>
+    </php>
+    <extensions>
+        <bootstrap class="Drupal\TestTools\Extension\HtmlLogging\HtmlOutputLogger">
+            <parameter name="outputDirectory" value="sites/simpletest/browser_output"/>
+            <parameter name="verbose" value="true"/>
+        </bootstrap>
+    </extensions>
+    <testsuites>
+        <testsuite name="unit">
+            <directory>web/modules/custom/*/tests/src/Unit</directory>
+            <directory>web/themes/custom/*/tests/src/Unit</directory>
+        </testsuite>
+        <testsuite name="kernel">
+            <directory>web/modules/custom/*/tests/src/Kernel</directory>
+            <directory>web/themes/custom/*/tests/src/Kernel</directory>
+        </testsuite>
+        <testsuite name="functional">
+            <directory>web/modules/custom/*/tests/src/Functional</directory>
+            <directory>web/themes/custom/*/tests/src/Functional</directory>
+        </testsuite>
+        <testsuite name="functional-javascript">
+            <directory>web/modules/custom/*/tests/src/FunctionalJavascript</directory>
+            <directory>web/themes/custom/*/tests/src/FunctionalJavascript</directory>
+        </testsuite>
+    </testsuites>
+    <logging>
+        <junit outputFile="../.logs/test_results/phpunit/phpunit.xml"/>
+    </logging>
+</phpunit>

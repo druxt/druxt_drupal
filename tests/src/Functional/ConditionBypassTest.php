@@ -1,7 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\druxt\Functional;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Url;
 use Drupal\block\Entity\Block;
@@ -12,6 +16,8 @@ use Drupal\Tests\BrowserTestBase;
  *
  * @group druxt
  */
+#[Group('druxt')]
+#[RunTestsInSeparateProcesses]
 class ConditionBypassTest extends BrowserTestBase {
 
   /**
@@ -27,7 +33,7 @@ class ConditionBypassTest extends BrowserTestBase {
   /**
    * Consumer user.
    *
-   * @var \Drupal\user\Entity\User
+   * @var \Drupal\user\UserInterface
    */
   protected $consumer;
 
@@ -59,7 +65,7 @@ class ConditionBypassTest extends BrowserTestBase {
   /**
    * Test that the block is inaccessible due to condition plugin.
    */
-  public function testRequestPathOmitted() {
+  public function testRequestPathOmitted(): void {
     $res = $this->drupalGet(Url::fromRoute('jsonapi.block--block.collection'));
     $this->assertSession()->statusCodeEquals(200);
     $output = Json::decode($res);
@@ -69,7 +75,7 @@ class ConditionBypassTest extends BrowserTestBase {
   /**
    * Test that the block condition plugin is bypassed with permission.
    */
-  public function testRequestPathBypass() {
+  public function testRequestPathBypass(): void {
     $this->drupalLogin($this->consumer);
 
     $res = $this->drupalGet(Url::fromRoute('jsonapi.block--block.collection'));

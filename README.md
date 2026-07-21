@@ -1,8 +1,77 @@
 # DruxtJS
 
-[![CircleCI](https://circleci.com/gh/druxt/druxt_drupal.svg?style=svg)](https://circleci.com/gh/druxt/druxt_drupal)
+[![Pipeline](https://git.drupalcode.org/project/druxt/badges/1.2.x/pipeline.svg)](https://git.drupalcode.org/project/druxt/-/pipelines)
+[![Test](https://github.com/druxt/druxt_drupal/actions/workflows/test.yml/badge.svg?branch=1.2.x)](https://github.com/druxt/druxt_drupal/actions/workflows/test.yml?query=branch%3A1.2.x)
+[![Coverage](https://codecov.io/gh/druxt/druxt_drupal/branch/1.2.x/graph/badge.svg)](https://codecov.io/gh/druxt/druxt_drupal/branch/1.2.x)
 
-> A bridge between frameworks, Drupal in the back, Nuxt.js in the front.
+A bridge between frameworks, Drupal in the back, Nuxt.js in the front.
+
+For a full description of the module, visit the
+[project page](https://www.drupal.org/project/druxt).
+
+Submit bug reports and feature suggestions, or track changes in the
+[issue queue](https://www.drupal.org/project/issues/druxt).
+
+
+## Table of contents
+
+- Requirements
+- Installation
+- Configuration
+- Features
+- Maintainers
+
+
+## Requirements
+
+This module requires the following modules:
+
+- [Decoupled Router](https://www.drupal.org/project/decoupled_router)
+- [JSON:API](https://www.drupal.org/docs/core-modules-and-themes/core-modules/jsonapi-module)
+- [JSON:API Menu Items](https://www.drupal.org/project/jsonapi_menu_items)
+- [JSON:API Views](https://www.drupal.org/project/jsonapi_views)
+
+
+## Installation
+
+DruxtJS requires a Nuxt.js frontend and a Drupal JSON:API backend.
+
+### Drupal
+
+1. [Install Drupal](https://www.drupal.org/docs/installing-drupal).
+2. Download the Drupal [DruxtJS module](https://www.drupal.org/project/druxt):
+   ```sh
+   composer require drupal/druxt
+   ```
+3. Install the DruxtJS module.
+4. Add the "**access druxt resources**" permission to a user/role.
+
+### Nuxt.js
+
+1. [Install Nuxt.js](https://nuxtjs.org/guide/installation/).
+2. Install the Nuxt.js [DruxtJS Site module](http://npmjs.com/package/druxt-site):
+   ```sh
+   npm i druxt-site
+   ```
+3. Add the module and configuration to `nuxt.config.js`:
+   ```js
+   module.exports = {
+     modules: [
+       'druxt-site'
+     ],
+     druxt: {
+       baseUrl: 'https://demo-api.druxtjs.org'
+     }
+   }
+   ```
+
+
+## Configuration
+
+Once installed, DruxtJS requires no additional configuration. The "**access
+druxt resources**" permission provides read-only access to all JSON:API
+resources required by the DruxtJS frontend.
+
 
 ## Features
 
@@ -15,45 +84,6 @@
 - Ensures EntityViewDisplay configuration available for [DruxtSchema](https://schema.druxtjs.org) module.
 
 
-## Installation
+## Maintainers
 
-DruxtJS requires a Nuxt.js frontend and a Drupal JSON:API backend:
-
-### Drupal
-
-1. [Install Drupal](https://www.drupal.org/docs/installing-drupal)
-
-2. Download the Drupal [DruxtJS module](https://www.drupal.org/project/druxt):
-
-    ```sh
-    composer require drupal/druxt
-    ```
-
-3. Install the DruxtJS module.
-
-4. Add the "**access druxt resources**" permission to a user/role.
-
-
-### Nuxt.js
-
-
-1. [Install Nuxt.js](https://nuxtjs.org/guide/installation/)
-
-2. Install the Nuxt.js [DruxtJS Site module](http://npmjs.com/package/druxt-site):
-
-    ```sh
-    npm i druxt-site
-    ```
-
-3. Add the module and configuration to `nuxt.config.js`:
-
-    ```js
-    module.exports = {
-      modules: [
-        'druxt-site'
-      ],
-      druxt: {
-        baseUrl: 'https://demo-api.druxtjs.org'
-      }
-    }
-    ```
+- Stuart Clark - [Deciphered](https://www.drupal.org/u/deciphered)

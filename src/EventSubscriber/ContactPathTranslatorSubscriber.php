@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\druxt\EventSubscriber;
 
 use Drupal\Component\Utility\UrlHelper;
@@ -20,7 +22,8 @@ class ContactPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
   /**
    * {@inheritdoc}
    */
-  public function onPathTranslation(PathTranslatorEvent $event) {
+  #[\Override]
+  public function onPathTranslation(PathTranslatorEvent $event): void {
     $response = $event->getResponse();
     if (!$response instanceof CacheableJsonResponse) {
       $this->logger->error('Unable to get the response object for the decoupled router event.');
@@ -35,7 +38,7 @@ class ContactPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
     try {
       $match_info = $this->router->match($path);
     }
-    catch (ResourceNotFoundException $exception) {
+    catch (ResourceNotFoundException) {
       // If URL is external, we won't perform checks for content in Drupal,
       // but assume that it's working.
       if (UrlHelper::isExternal($path)) {
@@ -46,7 +49,7 @@ class ContactPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
       }
       return;
     }
-    catch (MethodNotAllowedException $exception) {
+    catch (MethodNotAllowedException) {
       $response->setStatusCode(403);
       return;
     }
@@ -92,6 +95,9 @@ class ContactPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
       $rt = $rt_repo->get($contact_form_type_id, $contact_form->bundle());
       $type_name = $rt->getTypeName();
       $jsonapi_base_path = $this->container->getParameter('jsonapi.base_path');
+      if (!is_string($jsonapi_base_path)) {
+        $jsonapi_base_path = '';
+      }
       $entry_point_url = Url::fromRoute('jsonapi.resource_list', [], ['absolute' => TRUE])->toString(TRUE);
       $route_name = sprintf('jsonapi.%s.individual', $type_name);
       $individual = Url::fromRoute(

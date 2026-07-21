@@ -23,10 +23,11 @@ include:
 # https://git.drupalcode.org/project/gitlab_templates/-/blob/main/includes/include.drupalci.variables.yml
 # Uncomment the lines below if you want to override any of the variables. The following is just an example.
 ################
-# variables:
-#   SKIP_ESLINT: '1'
-#   OPT_IN_TEST_NEXT_MAJOR: '1'
-#   _CURL_TEMPLATES_REF: 'main'
-
 variables:
-  _CSPELL_WORDS: 'Nuxt, nuxt'
+  SKIP_ESLINT: '1'
+  SKIP_STYLELINT: '1'
+  _PHPUNIT_EXTRA: '--no-coverage --configuration=phpunit.gitlab-ci.xml'
+  _CSPELL_WORDS: 'Nuxt, nuxt, druxt, Fieldable, cloudflared, pushd, popd, phpcbf, phpcs, phpstan, rector, drush, pcov, langcode, simpleset, twigcsfixer, ddev, lando, drevops, skrypnyk, normalise, initialisation, initialised, langid, multisite, analyse'
+  OPT_IN_TEST_NEXT_MINOR: '1'
+  OPT_IN_TEST_NEXT_MAJOR: '0'
+  OPT_IN_TEST_MAX_PHP: '1'

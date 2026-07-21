@@ -1,0 +1,25 @@
+name: Draft release notes
+
+on:
+  push:
+    tags:
+      - '*'
+    branches:
+      - 1.2.x
+
+permissions:
+  contents: read
+
+jobs:
+  release-drafter:
+    permissions:
+      contents: write
+      pull-requests: write
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Draft release notes
+        uses: release-drafter/release-drafter@693d20e7c1ce1a81d3a41962f85914253b518449 # v7
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\druxt\EventSubscriber;
 
 use Drupal\Component\Utility\UrlHelper;
@@ -21,7 +23,8 @@ class WildcardPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
   /**
    * {@inheritdoc}
    */
-  public function onPathTranslation(PathTranslatorEvent $event) {
+  #[\Override]
+  public function onPathTranslation(PathTranslatorEvent $event): void {
     $response = $event->getResponse();
     if (!$response instanceof CacheableJsonResponse) {
       $this->logger->error('Unable to get the response object for the decoupled router event.');

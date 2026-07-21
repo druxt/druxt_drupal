@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\druxt;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
@@ -13,8 +15,11 @@ class DruxtServiceProvider implements ServiceModifierInterface {
   /**
    * {@inheritdoc}
    */
-  public function alter(ContainerBuilder $container) {
+  public function alter(ContainerBuilder $container): void {
     $cors_config = $container->getParameter('cors.config');
+    if (!is_array($cors_config)) {
+      $cors_config = [];
+    }
     if (!$cors_config['enabled']) {
       // Enable CORS by default.
       $cors_config['enabled'] = TRUE;

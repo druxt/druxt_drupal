@@ -5,24 +5,28 @@
  * Install functions for DruxtJS.
  */
 
+declare(strict_types=1);
+
+use Drupal\Component\Utility\DeprecationHelper;
+use Drupal\Core\Extension\Requirement\RequirementSeverity;
 use Drupal\Core\Link;
 use Drupal\Core\Url;
 
 /**
  * Implements hook_install().
  */
-function druxt_install() {
+function druxt_install(): void {
   druxt_ensure_entity_view_displays();
 }
 
 /**
  * Implements hook_requirements().
  */
-function druxt_requirements($phase) {
+function druxt_requirements(string $phase): array {
   $requirements = [];
 
   if (\Drupal::hasService('jsonapi.resource_type.repository')) {
-    $moduleHandler = \Drupal::service('module_handler');
+    $module_handler = \Drupal::service('module_handler');
     $resource_type_repository = \Drupal::service('jsonapi.resource_type.repository');
 
     $required_resources = [
@@ -47,7 +51,7 @@ function druxt_requirements($phase) {
         continue;
       }
       if ($resource_type->isInternal() == TRUE) {
-        if ($moduleHandler->moduleExists('jsonapi_extras')) {
+        if ($module_handler->moduleExists('jsonapi_extras')) {
           $disabled_resources[] = new Link(
             $resource,
             Url::fromRoute('entity.jsonapi_resource_config.edit_form', ['jsonapi_resource_config' => $resource], [
@@ -63,7 +67,7 @@ function druxt_requirements($phase) {
 
     // Report missing resources.
     if (count($missing_resources)) {
-      if ($phase == 'install') {
+      if ($phase === 'install') {
         \Drupal::messenger()->addWarning(t('Some required JSON:API resources are missing which may prevent a Druxt frontend from operating correctly. See the <a href=":status">Status report</a> for details.', [':status' => Url::fromRoute('system.status')->toString()]));
       }
 
@@ -74,13 +78,13 @@ function druxt_requirements($phase) {
           '#theme' => 'item_list',
           '#items' => $missing_resources,
         ],
-        'severity' => REQUIREMENT_WARNING,
+        'severity' => DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.2.0', fn(): RequirementSeverity => RequirementSeverity::Warning, fn() => REQUIREMENT_WARNING),
       ];
     }
 
     // Report disabled resources.
     if (count($disabled_resources)) {
-      if ($phase == 'install') {
+      if ($phase === 'install') {
         \Drupal::messenger()->addWarning(t('Some required JSON:API resources are disabled which may prevent a Druxt frontend from operating correctly. See the <a href=":status">Status report</a> for details.', [':status' => Url::fromRoute('system.status')->toString()]));
       }
 
@@ -91,7 +95,7 @@ function druxt_requirements($phase) {
           '#theme' => 'item_list',
           '#items' => $disabled_resources,
         ],
-        'severity' => REQUIREMENT_WARNING,
+        'severity' => DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.2.0', fn(): RequirementSeverity => RequirementSeverity::Warning, fn() => REQUIREMENT_WARNING),
       ];
     }
   }
@@ -102,6 +106,6 @@ function druxt_requirements($phase) {
 /**
  * Fix missing EntityViewDisplays.
  */
-function druxt_update_9000() {
+function druxt_update_9000(): void {
   druxt_ensure_entity_view_displays();
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\druxt\Plugin\Condition;
 
 use Drupal\system\Plugin\Condition\RequestPath;
@@ -20,6 +22,7 @@ class DruxtRequestPath extends RequestPath {
   /**
    * {@inheritdoc}
    */
+  #[\Override]
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
     $instance->currentUser = $container->get('current_user');
@@ -29,6 +32,7 @@ class DruxtRequestPath extends RequestPath {
   /**
    * {@inheritdoc}
    */
+  #[\Override]
   public function evaluate() {
     return druxt_access_check($this->currentUser) ? !$this->isNegated() : parent::evaluate();
   }
