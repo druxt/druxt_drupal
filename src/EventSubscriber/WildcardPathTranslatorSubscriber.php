@@ -52,9 +52,9 @@ class WildcardPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
       return;
     }
 
-    $route = $match_info[RouteObjectInterface::ROUTE_OBJECT];
+    $route_name = $match_info[RouteObjectInterface::ROUTE_NAME];
     try {
-      $resolved_url = Url::fromRoute($route, [], ['absolute' => TRUE])->toString(TRUE);
+      $resolved_url = Url::fromRoute($route_name, [], ['absolute' => TRUE])->toString(TRUE);
     }
     catch (MissingMandatoryParametersException $exception) {
       $response->setData([

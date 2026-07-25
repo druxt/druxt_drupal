@@ -20,7 +20,7 @@ class DruxtServiceProvider implements ServiceModifierInterface {
     if (!is_array($cors_config)) {
       $cors_config = [];
     }
-    if (!$cors_config['enabled']) {
+    if (!($cors_config['enabled'] ?? FALSE)) {
       // Enable CORS by default.
       $cors_config['enabled'] = TRUE;
 
