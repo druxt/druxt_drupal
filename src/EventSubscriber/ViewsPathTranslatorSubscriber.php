@@ -13,6 +13,7 @@ use Drupal\decoupled_router\PathTranslatorEvent;
 use Drupal\views\Views;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
 
 /**
  * Event subscriber that processes a path translation with the router info.
@@ -132,10 +133,19 @@ class ViewsPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
       $match_info['display_id'],
     ];
     $jsonapi_views_route = implode('.', $parts);
-    $resolved_jsonapi_views_url = Url::fromRoute($jsonapi_views_route, [], ['absolute' => TRUE])->toString(TRUE);
-    $response->addCacheableDependency($resolved_jsonapi_views_url);
+    // JSON:API Views does not give a route to every view. It skips a view that
+    // has no base entity type, and a view whose bundles have no JSON:API
+    // resource type. Such a view has no JSON:API endpoint. That is not an
+    // error, so keep the view data and leave the jsonapi_views key out.
+    try {
+      $resolved_jsonapi_views_url = Url::fromRoute($jsonapi_views_route, [], ['absolute' => TRUE])->toString(TRUE);
+      $response->addCacheableDependency($resolved_jsonapi_views_url);
 
-    $output['jsonapi_views'] = $resolved_jsonapi_views_url->getGeneratedUrl();
+      $output['jsonapi_views'] = $resolved_jsonapi_views_url->getGeneratedUrl();
+    }
+    catch (RouteNotFoundException) {
+      // The view has no JSON:API Views route.
+    }
 
     $response->addCacheableDependency($view);
     $response->setStatusCode(200);

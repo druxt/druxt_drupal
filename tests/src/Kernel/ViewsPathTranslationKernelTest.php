@@ -37,6 +37,7 @@ class ViewsPathTranslationKernelTest extends KernelTestBase {
     'file',
     'text',
     'filter',
+    'dblog',
     'node',
     'views',
     'path_alias',
@@ -57,6 +58,9 @@ class ViewsPathTranslationKernelTest extends KernelTestBase {
     $this->installEntitySchema('user');
     $this->installEntitySchema('path_alias');
     $this->installConfig(['system', 'field', 'filter', 'node']);
+    // The dblog module logs to this table. Install it so a log write during
+    // the test does not fail on a missing table.
+    $this->installSchema('dblog', ['watchdog']);
 
     NodeType::create(['type' => 'page', 'name' => 'Page'])->save();
 
@@ -90,6 +94,38 @@ class ViewsPathTranslationKernelTest extends KernelTestBase {
       ],
     ]);
     $view->save();
+
+    // A view on a table that is not an entity table. JSON:API Views gives no
+    // route to a view with no base entity type, so this display resolves as a
+    // view but has no JSON:API Views endpoint.
+    $no_endpoint_view = View::create([
+      'id' => 'druxt_test_no_endpoint',
+      'label' => 'Druxt test view without a JSON:API Views route',
+      'base_table' => 'watchdog',
+      'base_field' => 'wid',
+      'status' => TRUE,
+      'display' => [
+        'default' => [
+          'display_plugin' => 'default',
+          'id' => 'default',
+          'display_title' => 'Default',
+          'position' => 0,
+          'display_options' => [
+            'access' => ['type' => 'perm', 'options' => ['perm' => 'access content']],
+          ],
+        ],
+        'page_1' => [
+          'display_plugin' => 'page',
+          'id' => 'page_1',
+          'display_title' => 'Page',
+          'position' => 1,
+          'display_options' => [
+            'path' => 'druxt-test-no-endpoint',
+          ],
+        ],
+      ],
+    ]);
+    $no_endpoint_view->save();
 
     // Rebuild routes so the View page and jsonapi_views routes exist.
     \Drupal::service('router.builder')->rebuild();
@@ -162,6 +198,25 @@ class ViewsPathTranslationKernelTest extends KernelTestBase {
     // The subscriber returns early for non-View routes, leaving the default
     // 404 response untouched.
     $this->assertSame(404, $result['status']);
+  }
+
+  /**
+   * Tests a view that JSON:API Views gives no route to.
+   *
+   * JSON:API Views skips a view with no base entity type, so no
+   * jsonapi_views.<view>.<display> route exists for it. Building a URL from a
+   * route name that does not exist throws, which took the whole endpoint to a
+   * 500. The view still resolves, so the response must stay a 200 and simply
+   * leave the jsonapi_views key out.
+   */
+  public function testViewWithoutJsonapiViewsRoute(): void {
+    $result = $this->translatePath('/druxt-test-no-endpoint');
+
+    $this->assertSame(200, $result['status']);
+    $this->assertIsArray($result['data']);
+    $this->assertSame('druxt_test_no_endpoint', $result['data']['view']['view_id']);
+    $this->assertSame('page_1', $result['data']['view']['display_id']);
+    $this->assertArrayNotHasKey('jsonapi_views', $result['data']);
   }
 
 }
