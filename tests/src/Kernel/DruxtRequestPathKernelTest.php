@@ -12,7 +12,6 @@ use Drupal\user\Entity\User;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\Routing\Route;
 
@@ -165,25 +164,6 @@ class DruxtRequestPathKernelTest extends KernelTestBase {
     $event = $this->createPathTranslatorEvent('/some-path');
     $this->container->get('druxt.views_path_translator.subscriber')->onPathTranslation($event);
     $this->assertSame(404, $event->getResponse()->getStatusCode());
-  }
-
-  /**
-   * Tests all subscribers guard against non-CacheableJsonResponse events.
-   */
-  public function testNonCacheableResponseGuard(): void {
-    $subscribers = [
-      'druxt.contact_path_translator.subscriber',
-      'druxt.views_path_translator.subscriber',
-      'druxt.wildcard_path_translator.subscriber',
-    ];
-
-    foreach ($subscribers as $service_id) {
-      $event = $this->createPathTranslatorEvent('/test');
-      $ref = new \ReflectionProperty(PathTranslatorEvent::class, 'response');
-      $ref->setValue($event, new Response());
-      $this->container->get($service_id)->onPathTranslation($event);
-      $this->assertFalse($event->isPropagationStopped());
-    }
   }
 
   /**

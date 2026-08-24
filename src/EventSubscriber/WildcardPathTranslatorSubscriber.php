@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Drupal\druxt\EventSubscriber;
 
 use Drupal\Component\Utility\UrlHelper;
-use Drupal\Core\Cache\CacheableJsonResponse;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Routing\RouteObjectInterface;
 use Drupal\Core\Url;
@@ -26,10 +25,6 @@ class WildcardPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
   #[\Override]
   public function onPathTranslation(PathTranslatorEvent $event): void {
     $response = $event->getResponse();
-    if (!$response instanceof CacheableJsonResponse) {
-      $this->logger->error('Unable to get the response object for the decoupled router event.');
-      return;
-    }
 
     $path = $event->getPath();
     $path = $this->cleanSubdirInPath($path, $event->getRequest());
