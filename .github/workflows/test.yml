@@ -5,10 +5,11 @@ on:
     tags:
       - '**'
     branches:
-      - 1.2.x
+      # Every Drupal minor branch, so a new one does not need a workflow edit.
+      - '*.x'
   pull_request:
     branches:
-      - 1.2.x
+      - '*.x'
 
 permissions:
   contents: read
