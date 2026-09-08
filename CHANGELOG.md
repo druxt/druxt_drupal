@@ -10,6 +10,13 @@ Versions are the project's git tags. Some are tag only and have no
 
 ## [Unreleased]
 
+### Added
+
+- Configurable list of exposed JSON:API resources, at
+  `/admin/config/services/druxt`, with `hook_druxt_resources_alter()` for
+  modules that know what they need
+  ([#3309969](https://www.drupal.org/i/3309969)).
+
 ## [1.2.2] - 2026-09-05
 
 ### Added

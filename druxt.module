@@ -11,11 +11,138 @@ use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\jsonapi\JsonApiFilter;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
+use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\jsonapi\Routing\Routes;
+
+/**
+ * Gets the resources that predate the configuration entity rule.
+ *
+ * The menu_link_content resource shipped in the hardcoded list this
+ * configuration replaced. Refusing it now would break a site on update, so
+ * it is grandfathered rather than treated as precedent for content
+ * entities.
+ *
+ * @return string[]
+ *   Resource type ids that stay allowed whatever their entity type.
+ */
+function druxt_grandfathered_resources(): array {
+  return [
+    'menu_link_content--menu_link_content',
+  ];
+}
+
+/**
+ * Checks whether a resource may be added to the exposed list.
+ *
+ * Being on the list grants a blanket entity access result and unrestricted
+ * filtering for the request, so it is limited to configuration entities.
+ * Those carry no per-entity access, no personal data and no publishing
+ * state, which is what makes a blanket grant defensible. A module may still
+ * add anything through hook_druxt_resources_alter(), where the change is
+ * reviewable code rather than a checkbox.
+ *
+ * @param string $resource
+ *   A resource type id, as it appears in a JSON:API route.
+ *
+ * @return bool
+ *   TRUE when the resource may be configured.
+ */
+function druxt_resource_is_allowed(string $resource): bool {
+  if (in_array($resource, druxt_grandfathered_resources(), TRUE)) {
+    return TRUE;
+  }
+
+  [$entity_type_id] = explode('--', $resource, 2);
+  $definitions = \Drupal::entityTypeManager()->getDefinitions();
+  if (!isset($definitions[$entity_type_id])) {
+    return FALSE;
+  }
+
+  return $definitions[$entity_type_id]->entityClassImplements(ConfigEntityInterface::class);
+}
+
+/**
+ * Checks whether a stored resource may still be granted.
+ *
+ * Wider than druxt_resource_is_allowed(), and deliberately so. The form must
+ * not offer a resource this site cannot serve, but configuration must be
+ * able to name one, because a site sharing configuration with another may
+ * not have the module that provides it. An entity type that is not installed
+ * grants nothing, since no route exists for it.
+ *
+ * @param string $resource
+ *   A resource type id, as it appears in a JSON:API route.
+ *
+ * @return bool
+ *   TRUE when the resource may be stored and granted.
+ */
+function druxt_resource_is_permitted(string $resource): bool {
+  [$entity_type_id] = explode('--', $resource, 2);
+  if (!isset(\Drupal::entityTypeManager()->getDefinitions()[$entity_type_id])) {
+    return TRUE;
+  }
+
+  return druxt_resource_is_allowed($resource);
+}
+
+/**
+ * Gets the JSON:API resources DruxtJS exposes by default.
+ *
+ * Shipped as druxt.settings in config/install. Kept here as well so a site
+ * that has not run the update hook yet still serves its frontend, and so the
+ * access check has an answer before the module is configured.
+ *
+ * @return string[]
+ *   Resource type ids, as they appear in a JSON:API route.
+ */
+function druxt_default_resources(): array {
+  return [
+    'block--block',
+    'configurable_language--configurable_language',
+    'entity_form_display--entity_form_display',
+    'entity_form_mode--entity_form_mode',
+    'entity_view_display--entity_view_display',
+    'entity_view_mode--entity_view_mode',
+    'field_config--field_config',
+    'field_storage_config--field_storage_config',
+    'jsonapi_resource_config--jsonapi_resource_config',
+    'menu--menu',
+    'menu_link_content--menu_link_content',
+    'view--view',
+  ];
+}
+
+/**
+ * Gets the JSON:API resources DruxtJS exposes.
+ *
+ * An absent value falls back to the defaults, because a site updating from a
+ * release that hardcoded the list has no configuration yet. An empty list is
+ * a deliberate choice and is returned as it stands.
+ *
+ * @return string[]
+ *   Resource type ids, as they appear in a JSON:API route.
+ */
+function druxt_resources(): array {
+  $resources = \Drupal::config('druxt.settings')->get('resources');
+  $resources ??= druxt_default_resources();
+
+  // Recheck rather than trust what is stored. Configuration can hold a
+  // resource that is not safe to grant: written before this validation
+  // existed, or naming an entity type that has appeared since. Validation
+  // on import cannot catch either. The stored value is left alone, so a
+  // site sharing configuration keeps entries for modules it lacks.
+  $resources = array_values(array_filter($resources, druxt_resource_is_permitted(...)));
+
+  // After the recheck, so a module can still expose what configuration may
+  // not. A change here is reviewable code rather than a checkbox.
+  \Drupal::moduleHandler()->alter('druxt_resources', $resources);
+
+  return array_values($resources);
+}
 
 /**
  * Checks for Druxt route access.
@@ -34,21 +161,7 @@ function druxt_access_check(AccountInterface $account) {
   }
 
   // Is the JSON API resource a Druxt resource?
-  $resources = [
-    'block--block',
-    'configurable_language--configurable_language',
-    'entity_form_display--entity_form_display',
-    'entity_form_mode--entity_form_mode',
-    'entity_view_display--entity_view_display',
-    'entity_view_mode--entity_view_mode',
-    'field_config--field_config',
-    'field_storage_config--field_storage_config',
-    'jsonapi_resource_config--jsonapi_resource_config',
-    'menu--menu',
-    'menu_link_content--menu_link_content',
-    'view--view',
-  ];
-  if (!in_array($defaults['resource_type'], $resources)) {
+  if (!in_array($defaults['resource_type'], druxt_resources())) {
     return FALSE;
   }
 
@@ -64,7 +177,12 @@ function druxt_access_check(AccountInterface $account) {
  * Implements hook_entity_access().
  */
 function druxt_entity_access(EntityInterface $entity, string $operation, AccountInterface $account) {
-  return druxt_access_check($account) ? AccessResult::allowed() : AccessResult::neutral();
+  $access = druxt_access_check($account) ? AccessResult::allowed() : AccessResult::neutral();
+
+  // The answer was read from the resource list, so anything that caches it
+  // has to be invalidated when that list changes. While the list was
+  // hardcoded there was nothing to depend on.
+  return $access->addCacheableDependency(\Drupal::config('druxt.settings'));
 }
 
 /**
@@ -87,7 +205,8 @@ function druxt_jsonapi_entity_filter_access(EntityTypeInterface $entity_type, Ac
 
   $jsonapi_filter = DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.3.0', fn(): string => JsonApiFilter::AMONG_ALL, fn() => JSONAPI_FILTER_AMONG_ALL);
   return [
-    $jsonapi_filter => AccessResult::allowed(),
+    $jsonapi_filter => AccessResult::allowed()
+      ->addCacheableDependency(\Drupal::config('druxt.settings')),
   ];
 }
 

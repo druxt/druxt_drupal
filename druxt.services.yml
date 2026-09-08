@@ -18,3 +18,9 @@ services:
     parent: decoupled_router.router_path_translator.subscriber
     tags:
       - { name: event_subscriber }
+
+  druxt.config_import.subscriber:
+    class: Drupal\druxt\EventSubscriber\DruxtConfigImportSubscriber
+    arguments: ['@config.typed']
+    tags:
+      - { name: event_subscriber }

@@ -1,0 +1,5 @@
+druxt.settings:
+  title: 'Druxt'
+  description: 'Choose which JSON:API resources Druxt exposes.'
+  route_name: druxt.settings
+  parent: system.admin_config_services

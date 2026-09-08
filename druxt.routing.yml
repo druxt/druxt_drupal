@@ -1,0 +1,7 @@
+druxt.settings:
+  path: '/admin/config/services/druxt'
+  defaults:
+    _form: '\Drupal\druxt\Form\DruxtSettingsForm'
+    _title: 'Druxt'
+  requirements:
+    _permission: 'administer druxt'

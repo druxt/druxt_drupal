@@ -1,0 +1,12 @@
+druxt.settings:
+  type: config_object
+  label: 'DruxtJS settings'
+  mapping:
+    resources:
+      type: sequence
+      label: 'Exposed JSON:API resources'
+      sequence:
+        type: string
+        label: 'Resource type id'
+        constraints:
+          DruxtResource: ~

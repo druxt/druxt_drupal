@@ -1,0 +1,8 @@
+# druxt.api.php documents the hooks this module invokes. Nothing loads it, so
+# its sample implementations can only ever count as uncovered lines.
+#
+# PHPUnit's own <source> exclude cannot do this. The extension reaches the
+# build directory as a tree of symlinks, and coverage is keyed by the path
+# PHP resolves, so a web/modules/custom/... exclude never matches.
+ignore:
+  - "druxt.api.php"

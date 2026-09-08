@@ -13,6 +13,21 @@ use Drupal\Core\Link;
 use Drupal\Core\Url;
 
 /**
+ * Gets the resources the status report checks.
+ *
+ * The same list access is granted for, so the report cannot describe a set
+ * nobody is granted. This file carried its own hardcoded copy, which had
+ * already drifted: it omitted configurable_language and
+ * jsonapi_resource_config.
+ *
+ * @return string[]
+ *   Resource type ids, as they appear in a JSON:API route.
+ */
+function druxt_required_resources(): array {
+  return druxt_resources();
+}
+
+/**
  * Implements hook_install().
  */
 function druxt_install(): void {
@@ -29,18 +44,7 @@ function druxt_requirements(string $phase): array {
     $module_handler = \Drupal::service('module_handler');
     $resource_type_repository = \Drupal::service('jsonapi.resource_type.repository');
 
-    $required_resources = [
-      'block--block',
-      'entity_form_display--entity_form_display',
-      'entity_form_mode--entity_form_mode',
-      'entity_view_display--entity_view_display',
-      'entity_view_mode--entity_view_mode',
-      'field_config--field_config',
-      'field_storage_config--field_storage_config',
-      'menu--menu',
-      'menu_link_content--menu_link_content',
-      'view--view',
-    ];
+    $required_resources = druxt_required_resources();
     $disabled_resources = [];
     $missing_resources = [];
     foreach ($required_resources as $resource) {
@@ -108,4 +112,11 @@ function druxt_requirements(string $phase): array {
  */
 function druxt_update_9000(): void {
   druxt_ensure_entity_view_displays();
+}
+
+/**
+ * Move the exposed resource list into configuration.
+ */
+function druxt_update_10301(): void {
+  \Drupal::service('config.installer')->installDefaultConfig('module', 'druxt');
 }

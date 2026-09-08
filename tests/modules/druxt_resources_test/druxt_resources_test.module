@@ -1,0 +1,20 @@
+<?php
+
+/**
+ * @file
+ * Alters the exposed resource list, for testing the alter hook.
+ */
+
+declare(strict_types=1);
+
+/**
+ * Implements hook_druxt_resources_alter().
+ */
+function druxt_resources_test_druxt_resources_alter(array &$resources): void {
+  // A module may add a resource the user interface refuses to offer, because
+  // code review is the gate there rather than a checkbox.
+  $resources[] = 'user--user';
+
+  // A module may also take one away.
+  $resources = array_values(array_diff($resources, ['view--view']));
+}

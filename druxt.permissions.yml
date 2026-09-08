@@ -1,2 +1,6 @@
 'access druxt resources':
   title: 'Access DruxtJS JSON:API resources.'
+'administer druxt':
+  title: 'Administer Druxt'
+  description: 'Choose which JSON:API resources Druxt exposes.'
+  restrict access: true

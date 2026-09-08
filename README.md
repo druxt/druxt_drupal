@@ -19,6 +19,7 @@ Submit bug reports and feature suggestions, or track changes in the
 - Installation
 - Configuration
 - Features
+- Exposing additional resources
 - Maintainers
 
 
@@ -83,6 +84,53 @@ resources required by the DruxtJS frontend.
 - Enables Cross-Origin Resource Sharing (CORS) support.
 - Ensures EntityViewDisplay configuration available for [DruxtSchema](https://druxtjs.org/modules/schema) module.
 
+
+## Exposing additional resources
+
+Druxt exposes a fixed set of JSON:API resources to anyone holding the
+"access druxt resources" permission. A site can change that set at
+Configuration > Web services > Druxt, or at
+`/admin/config/services/druxt`.
+
+Editing the list needs the "administer druxt" permission, which is separate:
+"access druxt resources" controls what a frontend may read at runtime and
+does not grant access to the settings page.
+
+Only configuration entities are offered. Everything on the list is readable
+by everyone holding the permission, and there is no way to scope it to a
+role or a consumer, so a content entity type would expose every entity of
+that type including unpublished ones. Configuration carries no per-entity
+access and no unpublished state, so a list-wide grant costs little.
+
+`menu_link_content` is the exception. It is a content entity and it shipped
+in the list this configuration replaced, so removing it would break existing
+sites. It is accepted on impact, a disabled menu link being low risk, rather
+than because the rule does not apply to it.
+
+A worked example is `editor--editor`. A frontend that builds its editor
+toolbar from the text format's own configuration has to read it, and no
+permission short of "administer filters" grants that, which is not something
+to give an author because it also lets them edit text formats. Checking
+`editor--editor` lets an author's toolbar match what the site is configured
+for, and a change to a text format reaches the frontend without a rebuild.
+It is not enabled by default: a site that does not render Drupal's toolbars
+has no reason to expose the configuration.
+
+A module can add what it needs in code instead, so installing it is all a
+site has to do:
+
+```php
+/**
+ * Implements hook_druxt_resources_alter().
+ */
+function my_module_druxt_resources_alter(array &$resources): void {
+  $resources[] = 'my_module_settings--my_module_settings';
+}
+```
+
+See `druxt.api.php` for the full documentation. Unlike the settings form,
+the hook can expose any resource, because a change there is reviewable code
+rather than a checkbox.
 
 ## Maintainers
 

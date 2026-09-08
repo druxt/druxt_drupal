@@ -27,7 +27,7 @@ variables:
   SKIP_ESLINT: '1'
   SKIP_STYLELINT: '1'
   _PHPUNIT_EXTRA: '--configuration=phpunit.gitlab-ci.xml'
-  _CSPELL_WORDS: 'Nuxt, nuxt, druxt, Fieldable, cloudflared, pushd, popd, phpcbf, phpcs, phpstan, rector, drush, pcov, langcode, simpleset, twigcsfixer, ddev, lando, drevops, skrypnyk, normalise, initialisation, initialised, langid, multisite, analyse, synchronisation'
+  _CSPELL_WORDS: 'addtogroup, Nuxt, nuxt, druxt, Fieldable, cloudflared, pushd, popd, phpcbf, phpcs, phpstan, rector, drush, pcov, langcode, simpleset, twigcsfixer, ddev, lando, drevops, skrypnyk, normalise, initialisation, initialised, langid, multisite, analyse, synchronisation'
   OPT_IN_TEST_NEXT_MINOR: '1'
   OPT_IN_TEST_NEXT_MAJOR: '0'
   OPT_IN_TEST_MAX_PHP: '1'

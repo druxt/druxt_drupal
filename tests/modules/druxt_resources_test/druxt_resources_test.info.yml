@@ -1,0 +1,7 @@
+name: 'DruxtJS resources test'
+type: module
+description: 'Alters the exposed resource list, for testing the alter hook.'
+package: Testing
+core_version_requirement: ^10 || ^11 || ^12
+dependencies:
+  - drupal:druxt
