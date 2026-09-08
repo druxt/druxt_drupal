@@ -1,8 +1,8 @@
 # DruxtJS
 
-[![Pipeline](https://git.drupalcode.org/project/druxt/badges/1.2.x/pipeline.svg)](https://git.drupalcode.org/project/druxt/-/pipelines)
-[![Test](https://github.com/druxt/druxt_drupal/actions/workflows/test.yml/badge.svg?branch=1.2.x)](https://github.com/druxt/druxt_drupal/actions/workflows/test.yml?query=branch%3A1.2.x)
-[![Coverage](https://codecov.io/gh/druxt/druxt_drupal/branch/1.2.x/graph/badge.svg)](https://codecov.io/gh/druxt/druxt_drupal/branch/1.2.x)
+[![Pipeline](https://git.drupalcode.org/project/druxt/badges/1.3.x/pipeline.svg)](https://git.drupalcode.org/project/druxt/-/pipelines)
+[![Test](https://github.com/druxt/druxt_drupal/actions/workflows/test.yml/badge.svg?branch=1.3.x)](https://github.com/druxt/druxt_drupal/actions/workflows/test.yml?query=branch%3A1.3.x)
+[![Coverage](https://codecov.io/gh/druxt/druxt_drupal/branch/1.3.x/graph/badge.svg)](https://codecov.io/gh/druxt/druxt_drupal/branch/1.3.x)
 
 A bridge between frameworks, Drupal in the back, Nuxt.js in the front.
 
@@ -49,7 +49,7 @@ DruxtJS requires a Nuxt.js frontend and a Drupal JSON:API backend.
 ### Nuxt.js
 
 1. [Install Nuxt.js](https://nuxtjs.org/guide/installation/).
-2. Install the Nuxt.js [DruxtJS Site module](http://npmjs.com/package/druxt-site):
+2. Install the Nuxt.js [DruxtJS Site module](https://www.npmjs.com/package/druxt-site):
    ```sh
    npm i druxt-site
    ```
@@ -60,7 +60,7 @@ DruxtJS requires a Nuxt.js frontend and a Drupal JSON:API backend.
        'druxt-site'
      ],
      druxt: {
-       baseUrl: 'https://demo-api.druxtjs.org'
+       baseUrl: 'https://cms.example.com'
      }
    }
    ```
@@ -81,7 +81,7 @@ resources required by the DruxtJS frontend.
 - Improved support for Menu items via the [JSON:API Menu Items](https://www.drupal.org/project/jsonapi_menu_items) module.
 - Condition plugin bypass for Block resources.
 - Enables Cross-Origin Resource Sharing (CORS) support.
-- Ensures EntityViewDisplay configuration available for [DruxtSchema](https://schema.druxtjs.org) module.
+- Ensures EntityViewDisplay configuration available for [DruxtSchema](https://druxtjs.org/modules/schema) module.
 
 
 ## Maintainers
