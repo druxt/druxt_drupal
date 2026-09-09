@@ -10,22 +10,25 @@ Versions are the project's git tags. Some are tag only and have no
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-09-09
+
 ### Added
 
 - Configurable list of exposed JSON:API resources, at
-  `/admin/config/services/druxt`, with `hook_druxt_resources_alter()` for
-  modules that know what they need
-  ([#3309969](https://www.drupal.org/i/3309969)).
+  `/admin/config/services/druxt` behind a new "administer druxt" permission
+  ([#3309969](https://www.drupal.org/i/3309969)). The defaults are the twelve
+  resources earlier releases hardcoded, so nothing changes until the list is
+  edited. Configuration entity types only; `hook_druxt_resources_alter()` can
+  expose anything else.
+- Project logo, for the Drupal.org project page and Project Browser.
 
 ### Fixed
 
-- Preflighted cross-origin requests are no longer refused. Druxt enabled CORS
-  without setting `allowedMethods`, so the preflight allowed no method and the
-  browser dropped the request. Anonymous reads worked, and every JSON:API write
-  and every authenticated read failed. The default is now `['*']`, matching the
-  existing `allowedHeaders` default. A site that has set `cors.config.enabled`
-  to `TRUE` itself is unaffected, before and after. Setting it to `FALSE` does
-  not exempt a site: Druxt has always turned CORS on where it was off.
+- Preflighted cross-origin requests are no longer refused
+  ([#3541756](https://www.drupal.org/i/3541756)). Druxt enabled CORS without
+  setting `allowedMethods`, so a frontend on another origin could read
+  anonymously but could not write or authenticate. A site that has set
+  `cors.config.enabled` to `TRUE` supplies its own values and is unaffected.
 
 ## [1.2.2] - 2026-09-05
 
@@ -173,7 +176,8 @@ Versions are the project's git tags. Some are tag only and have no
   resources Druxt needs, Views route support via JSON:API Views and Decoupled
   Router, and Condition plugin bypass for Block resources.
 
-[Unreleased]: https://git.drupalcode.org/project/druxt/-/compare/1.2.2...1.2.x
+[Unreleased]: https://git.drupalcode.org/project/druxt/-/compare/1.3.0...1.3.x
+[1.3.0]: https://git.drupalcode.org/project/druxt/-/compare/1.2.2...1.3.0
 [1.2.2]: https://git.drupalcode.org/project/druxt/-/compare/1.2.1...1.2.2
 [1.2.1]: https://git.drupalcode.org/project/druxt/-/compare/1.2.0...1.2.1
 [1.2.0]: https://git.drupalcode.org/project/druxt/-/compare/1.1.1...1.2.0
