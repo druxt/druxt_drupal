@@ -66,6 +66,8 @@
         "phpstorm",
         "phpunit",
         "popd",
+        "preflighted",
+        "safelisted",
         "prompty",
         "prophesize",
         "pushd",

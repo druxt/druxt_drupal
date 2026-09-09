@@ -29,6 +29,13 @@ class DruxtServiceProvider implements ServiceModifierInterface {
         $cors_config['allowedHeaders'] = ['*'];
       }
 
+      // Set allowed methods to '*' by default when empty/undefined, so
+      // preflighted requests (writes, or reads carrying an Authorization
+      // header) are not rejected.
+      if (empty($cors_config['allowedMethods'])) {
+        $cors_config['allowedMethods'] = ['*'];
+      }
+
       $container->setParameter('cors.config', $cors_config);
     }
   }

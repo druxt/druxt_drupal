@@ -65,6 +65,24 @@ class DruxtServiceProviderTest extends TestCase {
   }
 
   /**
+   * Tests that a site-owned empty allowedMethods list is left alone.
+   *
+   * The defaults only apply where the site has not turned CORS on itself. A
+   * site that has, and has deliberately left the method list empty, keeps it,
+   * because the whole block is skipped rather than each value being filled in.
+   */
+  public function testAlterDoesNotSetMethodsWhenAlreadyEnabled(): void {
+    $container = new ContainerBuilder();
+    $container->setParameter('cors.config', ['enabled' => TRUE, 'allowedMethods' => []]);
+
+    (new DruxtServiceProvider())->alter($container);
+
+    $config = $container->getParameter('cors.config');
+    \assert(is_array($config));
+    $this->assertSame([], $config['allowedMethods']);
+  }
+
+  /**
    * Tests that an already-enabled config is left untouched.
    */
   public function testAlterDoesNotOverrideWhenAlreadyEnabled(): void {
