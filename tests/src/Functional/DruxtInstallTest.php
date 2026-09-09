@@ -28,6 +28,10 @@ class DruxtInstallTest extends BrowserTestBase {
    * {@inheritdoc}
    *
    * Druxt's dependencies, but not Druxt: the test installs that itself.
+   *
+   * JSON:API has to be among them. druxt_requirements() does nothing unless
+   * jsonapi.resource_type.repository exists, so installing Druxt alongside
+   * JSON:API rather than onto it never reaches the code this covers.
    */
   protected static $modules = [
     'jsonapi',

@@ -50,6 +50,7 @@ function druxt_requirements(string $phase): array {
 
   if (\Drupal::hasService('jsonapi.resource_type.repository')) {
     $module_handler = \Drupal::service('module_handler');
+    $entity_type_manager = \Drupal::entityTypeManager();
     $resource_type_repository = \Drupal::service('jsonapi.resource_type.repository');
 
     $required_resources = druxt_required_resources();
@@ -57,6 +58,18 @@ function druxt_requirements(string $phase): array {
     $missing_resources = [];
     foreach ($required_resources as $resource) {
       [$entity, $bundle] = explode('--', $resource);
+
+      // A resource for an entity type this site does not have is not missing,
+      // it is not applicable. The list is shared with sites that do have the
+      // module, so an entry for an absent one is expected rather than a fault.
+      // Without this, every site without Language or JSON:API Extras carries a
+      // permanent warning about configurable_language and
+      // jsonapi_resource_config, which the hardcoded list this replaced had
+      // simply omitted.
+      if (!$entity_type_manager->hasDefinition($entity)) {
+        continue;
+      }
+
       $resource_type = $resource_type_repository->get($entity, $bundle);
       if (!$resource_type) {
         $missing_resources[] = $resource;

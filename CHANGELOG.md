@@ -14,12 +14,20 @@ Versions are the project's git tags. Some are tag only and have no
 
 ### Fixed
 
-- Installing the module through the Extend form or `drush pm:install` no longer
-  dies with "Call to undefined function druxt_resources()". Both load
-  `druxt.install` on its own without loading `druxt.module`, and 1.3.0 moved
-  the resource list the status report checks into a function the install file
-  could not reach. Sites already running Druxt were unaffected, including
-  through the 1.3.0 update.
+- Adding the module to a site that already has JSON:API enabled no longer dies
+  with "Call to undefined function druxt_resources()". The Extend form and
+  `drush pm:install` both load `druxt.install` without loading `druxt.module`,
+  and 1.3.0 moved the resource list the status report checks into a function
+  the install file could not reach. Installing Druxt and JSON:API together was
+  unaffected, because the check is skipped while the JSON:API service is
+  absent. So was any site already running Druxt, including through the 1.3.0
+  update.
+- The status report no longer warns that `configurable_language` and
+  `jsonapi_resource_config` are missing on a site without the Language module
+  or JSON:API Extras. A resource for an entity type the site does not have is
+  not applicable rather than missing. The hardcoded list 1.3.0 replaced had
+  omitted exactly those two, so this only appeared once the list came from
+  configuration.
 
 ## [1.3.0] - 2026-09-09
 
