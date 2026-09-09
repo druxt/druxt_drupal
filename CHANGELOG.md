@@ -10,6 +10,17 @@ Versions are the project's git tags. Some are tag only and have no
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-09-09
+
+### Fixed
+
+- Installing the module through the Extend form or `drush pm:install` no longer
+  dies with "Call to undefined function druxt_resources()". Both load
+  `druxt.install` on its own without loading `druxt.module`, and 1.3.0 moved
+  the resource list the status report checks into a function the install file
+  could not reach. Sites already running Druxt were unaffected, including
+  through the 1.3.0 update.
+
 ## [1.3.0] - 2026-09-09
 
 ### Added
@@ -176,7 +187,8 @@ Versions are the project's git tags. Some are tag only and have no
   resources Druxt needs, Views route support via JSON:API Views and Decoupled
   Router, and Condition plugin bypass for Block resources.
 
-[Unreleased]: https://git.drupalcode.org/project/druxt/-/compare/1.3.0...1.3.x
+[Unreleased]: https://git.drupalcode.org/project/druxt/-/compare/1.3.1...1.3.x
+[1.3.1]: https://git.drupalcode.org/project/druxt/-/compare/1.3.0...1.3.1
 [1.3.0]: https://git.drupalcode.org/project/druxt/-/compare/1.2.2...1.3.0
 [1.2.2]: https://git.drupalcode.org/project/druxt/-/compare/1.2.1...1.2.2
 [1.2.1]: https://git.drupalcode.org/project/druxt/-/compare/1.2.0...1.2.1

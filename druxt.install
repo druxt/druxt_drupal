@@ -24,6 +24,14 @@ use Drupal\Core\Url;
  *   Resource type ids, as they appear in a JSON:API route.
  */
 function druxt_required_resources(): array {
+  // hook_requirements() at the install phase is reached from the Extend form
+  // and from Drush, and both load druxt.install on its own without ever
+  // loading druxt.module. So the function that owns the list has to be pulled
+  // in here rather than assumed present.
+  if (!function_exists('druxt_resources')) {
+    require_once __DIR__ . '/druxt.module';
+  }
+
   return druxt_resources();
 }
 
