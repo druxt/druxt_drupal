@@ -70,14 +70,18 @@ DruxtJS requires a Nuxt.js frontend and a Drupal JSON:API backend.
 
 ## Configuration
 
-Once installed, DruxtJS requires no additional configuration. The "**access
-druxt resources**" permission provides read-only access to all JSON:API
-resources required by the DruxtJS frontend.
+The Drupal module runs on its defaults. Grant the "**access druxt resources**"
+permission to a role and it provides read-only access to all JSON:API resources
+required by the DruxtJS frontend.
+
+Choose which resources those are at Administration > Configuration > Web
+services > Druxt. The sections below say when a site needs to change that list
+or the CORS defaults.
 
 
 ## Features
 
-- A single permission for read-only access to all JSON:API resources required by DruxtJS.
+- A permission for read-only access to all JSON:API resources required by DruxtJS.
 - Support for Views routes via the [JSON:API Views](https://www.drupal.org/project/jsonapi_views) and [Decoupled Router](https://www.drupal.org/project/decoupled_router) modules.
 - Support for Contact form routes via the [Decoupled Router](https://www.drupal.org/project/decoupled_router) module.
 - Improved support for Menu items via the [JSON:API Menu Items](https://www.drupal.org/project/jsonapi_menu_items) module.
@@ -88,7 +92,7 @@ resources required by the DruxtJS frontend.
 ## Cross-Origin Resource Sharing
 
 A decoupled frontend runs on a different origin to Drupal, so the browser
-will not read a response unless Drupal says the origin is allowed. Core ships
+will not read a response unless Drupal says the origin is allowed. Core leaves
 CORS turned off, so Druxt turns it on.
 
 Druxt only stands aside when the site has turned CORS on itself. If
@@ -109,8 +113,8 @@ Where Druxt does apply, it fills in the three values core leaves empty:
 that is not a simple one. Not every write is preflighted in general, because a
 POST carrying a safelisted content type is not, but every JSON:API write is,
 because `application/vnd.api+json` is never safelisted. So is every read
-carrying an `Authorization` header. Preflight asks whether the method is
-allowed, and an empty list answers no, so the request never happens. A site
+carrying an `Authorization` header. Preflight checks the method against
+the list, and an empty list permits none, so the request never happens. A site
 with the list empty works for anonymous reads and fails for everything else.
 
 These defaults let any origin call the site. That is the right default for
@@ -145,14 +149,15 @@ Only configuration entities are offered. Everything on the list is readable
 by everyone holding the permission, and there is no way to scope it to a
 role or a consumer, so a content entity type would expose every entity of
 that type including unpublished ones. Configuration carries no per-entity
-access and no unpublished state, so a list-wide grant costs little.
+access and no unpublished state, so a list-wide grant exposes exactly what the
+list names and nothing behind it.
 
-`menu_link_content` is the exception. It is a content entity and it shipped
-in the list this configuration replaced, so removing it would break existing
+`menu_link_content` is the exception. It is a content entity and it was in the
+hardcoded list this configuration replaced, so removing it would break existing
 sites. It is accepted on impact, a disabled menu link being low risk, rather
 than because the rule does not apply to it.
 
-A worked example is `editor--editor`. A frontend that builds its editor
+`editor--editor` is the worked example. A frontend that builds its editor
 toolbar from the text format's own configuration has to read it, and no
 permission short of "administer filters" grants that, which is not something
 to give an author because it also lets them edit text formats. Checking

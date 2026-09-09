@@ -5,7 +5,7 @@ This file provides guidance to AI agents when working with code in this reposito
 ## Overview
 
 DruxtJS is a Drupal module that bridges Drupal's JSON:API backend with a
-[Nuxt.js](https://nuxtjs.org) frontend. It provides a single permission for
+[Nuxt.js](https://nuxtjs.org) frontend. It provides a permission for
 read-only access to all JSON:API resources required by the
 [DruxtJS](https://druxtjs.org) frontend framework, plus route translation
 support for Views, Contact forms, and wildcard paths via the Decoupled Router
@@ -13,7 +13,7 @@ module.
 
 ## Development Commands
 
-**HARD RULE - use the provided command wrappers, never the tool binaries directly.** When `make` or `ahoy` exposes a command for a task, use that command; do not call the underlying binary directly. Each wrapper `chdir`s into `build/` and runs the tool with the config, plugins, and environment that CI uses, so a raw invocation from the repository root silently diverges from CI - it can pass locally while CI fails (or vice versa), or crash outright when a relative path resolves against the wrong directory. If no wrapped command covers what you need, extend the `make` / `ahoy` target rather than making a one-off raw call; if that is not feasible, stop and ask.
+**HARD RULE - use the provided command wrappers, never the tool binaries directly.** When `make` or `ahoy` exposes a command for a task, use that command. Do not call the underlying binary directly. Each wrapper `chdir`s into `build/` and runs the tool with the config, plugins, and environment that CI uses, so a raw invocation from the repository root silently diverges from CI - it can pass locally while CI fails (or vice versa), or crash outright when a relative path resolves against the wrong directory. If no wrapped command covers what you need, extend the `make` / `ahoy` target rather than making a one-off raw call. If that is not feasible, stop and ask.
 
 Run each tool through its `make` wrapper, never the binary directly:
 
@@ -77,14 +77,14 @@ Run each tool through its `make` wrapper, never the binary directly:
 - `tests/src/Functional/` - Functional tests (condition bypass, CORS, permissions, EntityViewDisplay)
 - `build/` - Assembled Drupal codebase (symlinked extension, gitignored)
 - `.devtools/` - Build and deployment scripts used by CI
-- `scripts/` - Custom post-start (`start-*.sh`), post-provision (`provision-*.sh`), and pre-stop (`stop-*.sh`) hooks. Run automatically at the end of each phase in lexicographic order; non-zero exit aborts the parent. Excluded from distribution archives via `.gitattributes`
+- `scripts/` - Custom post-start (`start-*.sh`), post-provision (`provision-*.sh`), and pre-stop (`stop-*.sh`) hooks. Run automatically at the end of each phase in lexicographic order. A non-zero exit aborts the parent. Excluded from distribution archives via `.gitattributes`
 
 ## Architecture
 
 - **Route translation**: Event subscribers integrate with the Decoupled Router
   module to translate Views, Contact form, and wildcard paths for the DruxtJS
   frontend.
-- **Resource access**: A single `access druxt resources` permission gates
+- **Resource access**: The `access druxt resources` permission gates
   read-only access to all JSON:API resources the frontend needs.
 - **Condition bypass**: Block condition plugins are bypassed for Druxt requests
   so all blocks are available to the frontend.
