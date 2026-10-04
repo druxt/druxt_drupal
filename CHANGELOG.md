@@ -10,6 +10,16 @@ Versions are the project's git tags. Some are tag only and have no
 
 ## [Unreleased]
 
+### Fixed
+
+- `translate-path` no longer answers a user's path, such as `/user/2`, with a
+  500. The wildcard path translator built the route's URL with no
+  parameters, and it ran beside the entity resolver and stopped the event, so
+  it also took entity paths from the resolver that answers with the entity.
+  It now stands aside for a path that resolves to an entity, and for one that
+  names an entity that does not exist, and rebuilds any other route with the
+  parameters the path gave it, so a link such as a password reset resolves.
+
 ## [1.3.1] - 2026-09-09
 
 ### Fixed

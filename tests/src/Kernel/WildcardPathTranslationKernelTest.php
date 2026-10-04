@@ -8,6 +8,7 @@ use Drupal\decoupled_router\PathTranslatorEvent;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
+use Drupal\Tests\user\Traits\UserCreationTrait;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,6 +22,8 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 #[Group('druxt')]
 #[RunTestsInSeparateProcesses]
 class WildcardPathTranslationKernelTest extends KernelTestBase {
+
+  use UserCreationTrait;
 
   /**
    * {@inheritdoc}
@@ -51,21 +54,29 @@ class WildcardPathTranslationKernelTest extends KernelTestBase {
     $this->installConfig(['system', 'node', 'filter']);
 
     NodeType::create(['type' => 'page', 'name' => 'Page'])->save();
+    // The entity resolver answers only what the reader may view.
+    $this->setUpCurrentUser([], ['access content', 'access user profiles']);
 
     \Drupal::service('router.builder')->rebuild();
+  }
+
+  /**
+   * A translation event for a path.
+   */
+  private function event(string $path): PathTranslatorEvent {
+    return new PathTranslatorEvent(
+      $this->container->get('http_kernel'),
+      Request::create('/router/translate-path', 'GET'),
+      HttpKernelInterface::MAIN_REQUEST,
+      $path
+    );
   }
 
   /**
    * Translates a path through the WildcardPathTranslatorSubscriber.
    */
   private function translatePath(string $path): array {
-    $request = Request::create('/router/translate-path', 'GET');
-    $event = new PathTranslatorEvent(
-      $this->container->get('http_kernel'),
-      $request,
-      HttpKernelInterface::MAIN_REQUEST,
-      $path
-    );
+    $event = $this->event($path);
     $this->container->get('druxt.wildcard_path_translator.subscriber')->onPathTranslation($event);
 
     $response = $event->getResponse();
@@ -87,19 +98,46 @@ class WildcardPathTranslationKernelTest extends KernelTestBase {
   }
 
   /**
-   * Tests that a parameterized route with missing params returns a 500.
+   * Tests that an entity's path is left to the entity resolver.
    */
-  public function testParameterizedPath(): void {
-    $node = Node::create([
-      'type' => 'page',
-      'title' => 'A page',
-      'status' => 1,
-    ]);
+  public function testEntityPathStandsAside(): void {
+    $node = Node::create(['type' => 'page', 'title' => 'A page', 'status' => 1]);
     $node->save();
 
-    $result = $this->translatePath('/node/' . $node->id());
+    $account = $this->createUser();
 
-    $this->assertSame(500, $result['status']);
+    foreach (['/node/' . $node->id(), '/user/' . $account->id(), '/user/999'] as $path) {
+      $event = $this->event($path);
+      $this->container->get('druxt.wildcard_path_translator.subscriber')->onPathTranslation($event);
+
+      $this->assertFalse($event->isPropagationStopped(), $path);
+      $this->assertArrayNotHasKey('resolved', (array) json_decode((string) $event->getResponse()->getContent(), TRUE), $path);
+    }
+  }
+
+  /**
+   * Tests that the whole event answers an entity's path with the entity.
+   */
+  public function testEntityResolverAnswersAnEntityPath(): void {
+    $node = Node::create(['type' => 'page', 'title' => 'A page', 'status' => 1]);
+    $node->save();
+
+    $event = $this->event('/node/' . $node->id());
+    $this->container->get('event_dispatcher')->dispatch($event, PathTranslatorEvent::TRANSLATE);
+    $data = json_decode((string) $event->getResponse()->getContent(), TRUE);
+
+    $this->assertSame(200, $event->getResponse()->getStatusCode());
+    $this->assertSame($node->uuid(), $data['entity']['uuid'] ?? NULL);
+  }
+
+  /**
+   * Tests that a route with parameters that are not entities resolves.
+   */
+  public function testRouteParametersAreKept(): void {
+    $result = $this->translatePath('/user/reset/1/1234567890/abcdef');
+
+    $this->assertSame(200, $result['status']);
+    $this->assertStringEndsWith('/user/reset/1/1234567890/abcdef', $result['data']['resolved']);
   }
 
   /**

@@ -6,6 +6,8 @@ namespace Drupal\druxt\EventSubscriber;
 
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\ParamConverter\ParamNotConvertedException;
 use Drupal\Core\Routing\RouteObjectInterface;
 use Drupal\Core\Url;
 use Drupal\decoupled_router\EventSubscriber\RouterPathTranslatorSubscriber;
@@ -31,7 +33,7 @@ class WildcardPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
     try {
       $match_info = $this->router->match($path);
     }
-    catch (ResourceNotFoundException $exception) {
+    catch (ResourceNotFoundException) {
       // If URL is external, we won't perform checks for content in Drupal,
       // but assume that it's working.
       if (UrlHelper::isExternal($path)) {
@@ -42,21 +44,42 @@ class WildcardPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
       }
       return;
     }
-    catch (MethodNotAllowedException $exception) {
+    catch (MethodNotAllowedException) {
       $response->setStatusCode(403);
+      return;
+    }
+    // @phpstan-ignore catch.neverThrown (Drupal's router throws it from parameter conversion, undeclared by the matcher interface.)
+    catch (ParamNotConvertedException) {
+      // The path names an entity that does not exist, such as `/user/999`.
+      // Answering that is the entity resolver's business, and the uncaught
+      // exception would have failed the whole request.
       return;
     }
 
     $route_name = $match_info[RouteObjectInterface::ROUTE_NAME];
-    try {
-      $resolved_url = Url::fromRoute($route_name, [], ['absolute' => TRUE])->toString(TRUE);
+
+    // A path carrying an entity belongs to the entity resolver, which
+    // answers with the entity, its uuid and its JSON:API link. This one
+    // answers for whatever nothing else claims, and it runs at the same
+    // priority and stops propagation, so claiming an entity path takes that
+    // answer away. It built its URL with no parameters at all, which for
+    // `/user/2` raised and became a 500 for the whole request.
+    foreach ($match_info as $value) {
+      if ($value instanceof EntityInterface) {
+        return;
+      }
     }
-    catch (MissingMandatoryParametersException $exception) {
-      $response->setData([
-        'message' => 'Unable to build route URL.',
-        'details' => $exception->getMessage(),
-      ]);
-      $response->setStatusCode(500);
+
+    // The route is rebuilt with the values the path gave it, so a route with
+    // parameters that are not entities, such as a password reset link,
+    // resolves rather than failing for want of them.
+    $parameters = isset($match_info['_raw_variables']) ? $match_info['_raw_variables']->all() : [];
+    try {
+      $resolved_url = Url::fromRoute($route_name, $parameters, ['absolute' => TRUE])->toString(TRUE);
+    }
+    catch (MissingMandatoryParametersException) {
+      // A path this resolver cannot rebuild is not one it can answer for,
+      // so it stands aside rather than failing the request.
       return;
     }
     $response->addCacheableDependency($resolved_url);
