@@ -26,7 +26,14 @@ include:
 variables:
   SKIP_ESLINT: '1'
   SKIP_STYLELINT: '1'
+  # The phpunit binary (_PHPUNIT_CONCURRENT: 0) loads phpunit.xml from the
+  # project root. That file is the scaffold config for local and GitHub runs.
+  # This flag points the binary at the DrupalCI config instead.
   _PHPUNIT_EXTRA: '--configuration=phpunit.gitlab-ci.xml'
+  # run-tests.sh (_PHPUNIT_CONCURRENT: 1, the default) uses core's phpunit
+  # config and needs no extra options. The '-' stops the template copying
+  # _PHPUNIT_EXTRA into this variable.
+  _RUNTESTS_EXTRA: '-'
   _CSPELL_WORDS: 'addtogroup, Nuxt, nuxt, druxt, Fieldable, cloudflared, pushd, popd, phpcbf, phpcs, phpstan, rector, drush, pcov, langcode, preflighted, safelisted, simpleset, twigcsfixer, ddev, lando, drevops, skrypnyk, normalise, initialisation, initialised, langid, multisite, analyse, synchronisation'
   OPT_IN_TEST_NEXT_MINOR: '1'
   OPT_IN_TEST_NEXT_MAJOR: '0'
