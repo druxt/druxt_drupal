@@ -1,4 +1,5 @@
 resources:
+  - base_field_override--base_field_override
   - block--block
   - configurable_language--configurable_language
   - entity_form_display--entity_form_display

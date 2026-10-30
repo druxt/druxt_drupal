@@ -218,12 +218,37 @@ class DruxtResourcesKernelTest extends KernelTestBase {
     $this->assertContains('menu_link_content--menu_link_content', $resources);
     $this->assertContains('view--view', $resources);
 
-    // Nothing is added to the default. Making the list configurable must not
-    // change what an existing site exposes. A site that wants more, such as
-    // editor--editor for a frontend that renders a text format's toolbar,
-    // chooses it.
+    // A bundle's own base field labels, which 1.3.0 left out. A
+    // configuration entity.
+    $this->assertContains('base_field_override--base_field_override', $resources);
+
+    // Nothing else is added. A site that wants more, such as editor--editor
+    // for a frontend that renders a text format's toolbar, chooses it. The
+    // workflow resource waits on the Workflows module, which is not here.
     $this->assertNotContains('editor--editor', $resources);
-    $this->assertCount(12, $resources);
+    $this->assertNotContains('workflow--workflow', $resources);
+    $this->assertCount(13, $resources);
+  }
+
+  /**
+   * Tests that the workflow resource joins the defaults with Workflows.
+   *
+   * Workflows is never a dependency. Installing it brings the moderation
+   * widget's states and transitions into the defaults, and into a site's
+   * configured list, and uninstalling it takes them out again.
+   */
+  public function testWorkflowResourceFollowsTheWorkflowsModule(): void {
+    // Uninstalling a module clears its users' data, which needs the table.
+    $this->installSchema('user', ['users_data']);
+    $this->assertNotContains('workflow--workflow', druxt_default_resources());
+
+    $this->container->get('module_installer')->install(['workflows']);
+    $this->assertContains('workflow--workflow', druxt_default_resources());
+    $this->assertContains('workflow--workflow', $this->config('druxt.settings')->get('resources'));
+    $this->assertContains('workflow--workflow', druxt_resources());
+
+    $this->container->get('module_installer')->uninstall(['workflows']);
+    $this->assertNotContains('workflow--workflow', $this->config('druxt.settings')->get('resources'));
   }
 
   /**

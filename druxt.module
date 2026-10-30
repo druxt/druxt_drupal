@@ -100,7 +100,8 @@ function druxt_resource_is_permitted(string $resource): bool {
  *   Resource type ids, as they appear in a JSON:API route.
  */
 function druxt_default_resources(): array {
-  return [
+  $resources = [
+    'base_field_override--base_field_override',
     'block--block',
     'configurable_language--configurable_language',
     'entity_form_display--entity_form_display',
@@ -114,6 +115,59 @@ function druxt_default_resources(): array {
     'menu_link_content--menu_link_content',
     'view--view',
   ];
+  // The moderation widget's states and transitions, when the Workflows module
+  // is installed. Never a dependency: a site without it has no workflow entity
+  // type, and the list says nothing of one.
+  if (\Drupal::entityTypeManager()->hasDefinition('workflow')) {
+    $resources[] = 'workflow--workflow';
+  }
+  return $resources;
+}
+
+/**
+ * Adds or removes a module's resource in the configured list.
+ *
+ * @param string $resource
+ *   The resource type id.
+ * @param bool $present
+ *   TRUE to add it when absent, FALSE to remove it when present.
+ */
+function druxt_set_configured_resource(string $resource, bool $present): void {
+  $config = \Drupal::configFactory()->getEditable('druxt.settings');
+  $resources = $config->get('resources');
+  if ($resources === NULL) {
+    return;
+  }
+  $has = in_array($resource, $resources, TRUE);
+  if ($present && !$has) {
+    $resources[] = $resource;
+    sort($resources);
+    $config->set('resources', $resources)->save();
+  }
+  elseif (!$present && $has) {
+    $config->set('resources', array_values(array_diff($resources, [$resource])))->save();
+  }
+}
+
+/**
+ * Implements hook_modules_installed().
+ *
+ * The Workflows module brings the workflow resource into the defaults, so a
+ * site that installs it later exposes the resource as a fresh site does.
+ */
+function druxt_modules_installed(array $modules, bool $is_syncing): void {
+  if (!$is_syncing && in_array('workflows', $modules, TRUE)) {
+    druxt_set_configured_resource('workflow--workflow', TRUE);
+  }
+}
+
+/**
+ * Implements hook_modules_uninstalled().
+ */
+function druxt_modules_uninstalled(array $modules, bool $is_syncing): void {
+  if (!$is_syncing && in_array('workflows', $modules, TRUE)) {
+    druxt_set_configured_resource('workflow--workflow', FALSE);
+  }
 }
 
 /**

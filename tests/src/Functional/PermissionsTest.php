@@ -31,6 +31,9 @@ class PermissionsTest extends BrowserTestBase {
     'menu_link_content',
     'node',
     'views',
+    // A test dependency only: the workflow resource joins the defaults when
+    // the module is installed, and the test reads every default.
+    'workflows',
   ];
 
   /**
@@ -44,6 +47,7 @@ class PermissionsTest extends BrowserTestBase {
    * @var array
    */
   protected $resources = [
+    'base_field_override--base_field_override',
     'block--block',
     'entity_form_display--entity_form_display',
     'entity_form_mode--entity_form_mode',
@@ -53,6 +57,7 @@ class PermissionsTest extends BrowserTestBase {
     'field_storage_config--field_storage_config',
     'menu_link_content--menu_link_content',
     'view--view',
+    'workflow--workflow',
   ];
 
   /**

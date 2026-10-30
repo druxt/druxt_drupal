@@ -141,3 +141,30 @@ function druxt_update_9000(): void {
 function druxt_update_10301(): void {
   \Drupal::service('config.installer')->installDefaultConfig('module', 'druxt');
 }
+
+/**
+ * Expose base field overrides and, with Workflows installed, workflows.
+ *
+ * A bundle's own base field labels live in base_field_override, and the
+ * moderation widget's states and transitions in workflow. Each joins a site's
+ * configured list when absent, the workflow one only where the module is.
+ */
+function druxt_update_10302(): void {
+  $config = \Drupal::configFactory()->getEditable('druxt.settings');
+  $resources = $config->get('resources') ?? druxt_default_resources();
+  $wanted = ['base_field_override--base_field_override'];
+  if (\Drupal::entityTypeManager()->hasDefinition('workflow')) {
+    $wanted[] = 'workflow--workflow';
+  }
+  $added = FALSE;
+  foreach ($wanted as $resource) {
+    if (!in_array($resource, $resources, TRUE)) {
+      $resources[] = $resource;
+      $added = TRUE;
+    }
+  }
+  if ($added) {
+    sort($resources);
+    $config->set('resources', $resources)->save();
+  }
+}

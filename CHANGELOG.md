@@ -10,6 +10,18 @@ Versions are the project's git tags. Some are tag only and have no
 
 ## [Unreleased]
 
+### Added
+
+- `base_field_override--base_field_override` is exposed by default, so a
+  frontend reads a bundle's own label, description and required flag for a
+  base field, such as a recipe's "Recipe Name" for its title.
+- `workflow--workflow` is exposed by default where the Workflows module is
+  installed, so a frontend renders the moderation widget's states and
+  transitions without an account that may administer workflows. Workflows is
+  no dependency: installing it later adds the resource to a site's configured
+  list, and uninstalling it removes it. The update adds both resources to a
+  site's configured list when they are absent.
+
 ## [1.3.1] - 2026-09-09
 
 ### Fixed
