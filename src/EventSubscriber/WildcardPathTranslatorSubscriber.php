@@ -25,6 +25,17 @@ class WildcardPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
    * {@inheritdoc}
    */
   #[\Override]
+  public static function getSubscribedEvents(): array {
+    // This answers for whatever is left, so it runs after every other
+    // resolver.
+    $events[PathTranslatorEvent::TRANSLATE][] = ['onPathTranslation', -100];
+    return $events;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  #[\Override]
   public function onPathTranslation(PathTranslatorEvent $event): void {
     $response = $event->getResponse();
 
@@ -59,11 +70,9 @@ class WildcardPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
     $route_name = $match_info[RouteObjectInterface::ROUTE_NAME];
 
     // A path carrying an entity belongs to the entity resolver, which
-    // answers with the entity, its uuid and its JSON:API link. This one
-    // answers for whatever nothing else claims, and it runs at the same
-    // priority and stops propagation, so claiming an entity path takes that
-    // answer away. It built its URL with no parameters at all, which for
-    // `/user/2` raised and became a 500 for the whole request.
+    // answers with the entity, its uuid and its JSON:API link, or with a 403.
+    // The 403 does not stop the event, so this resolver still runs after it,
+    // and an answer here would replace that 403.
     foreach ($match_info as $value) {
       if ($value instanceof EntityInterface) {
         return;

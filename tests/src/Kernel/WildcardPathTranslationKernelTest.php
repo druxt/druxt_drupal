@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\druxt\Kernel;
 
 use Drupal\decoupled_router\PathTranslatorEvent;
+use Drupal\druxt\EventSubscriber\WildcardPathTranslatorSubscriber;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
@@ -128,6 +129,33 @@ class WildcardPathTranslationKernelTest extends KernelTestBase {
 
     $this->assertSame(200, $event->getResponse()->getStatusCode());
     $this->assertSame($node->uuid(), $data['entity']['uuid'] ?? NULL);
+  }
+
+  /**
+   * Tests that the whole event keeps the entity resolver's access denied.
+   */
+  public function testAccessDeniedEntityStaysDenied(): void {
+    $node = Node::create(['type' => 'page', 'title' => 'A page', 'status' => 0]);
+    $node->save();
+
+    $event = $this->event('/node/' . $node->id());
+    $this->container->get('event_dispatcher')->dispatch($event, PathTranslatorEvent::TRANSLATE);
+    $data = json_decode((string) $event->getResponse()->getContent(), TRUE);
+
+    $this->assertSame(403, $event->getResponse()->getStatusCode());
+    $this->assertSame('Access denied for entity.', $data['message'] ?? NULL);
+  }
+
+  /**
+   * Tests that this resolver runs after every other resolver.
+   */
+  public function testRunsLast(): void {
+    // Service order also puts it last, so the priority needs its own check.
+    $this->assertSame(['onPathTranslation', -100], WildcardPathTranslatorSubscriber::getSubscribedEvents()[PathTranslatorEvent::TRANSLATE][0]);
+    $listeners = $this->container->get('event_dispatcher')->getListeners(PathTranslatorEvent::TRANSLATE);
+    $last = end($listeners);
+    $this->assertIsArray($last);
+    $this->assertInstanceOf(WildcardPathTranslatorSubscriber::class, $last[0]);
   }
 
   /**

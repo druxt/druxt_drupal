@@ -19,6 +19,10 @@ Versions are the project's git tags. Some are tag only and have no
   It now stands aside for a path that resolves to an entity, and for one that
   names an entity that does not exist, and rebuilds any other route with the
   parameters the path gave it, so a link such as a password reset resolves.
+- `translate-path` keeps the 403 for an entity the visitor cannot view. The
+  wildcard path translator replaced it with a 500.
+- The wildcard path translator now runs after every other resolver. This was
+  left to service order.
 
 ## [1.3.1] - 2026-09-09
 
